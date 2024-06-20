@@ -1,67 +1,17 @@
 <template>
-  <v-container
-    fluid
-  >
-    <v-card class="pa-3">
-      <v-row>
-        <v-col>
-          <v-card
-            class="pa-3"
-            outlined
-            >
-            COL
-          </v-card>
-        </v-col>
-        <v-col>
-          <v-card
-            class="pa-3"
-            outlined
-          >
-            COL
-          </v-card>
-        </v-col>
-        <v-col>
-          <v-card
-            class="pa-3"
-            outlined
-          >
-            COL
-          </v-card>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-card
-            class="pa-3"
-            outlined
-          >
-            COL
-          </v-card>
-        </v-col>
-        <v-col>
-          <v-card
-            class="pa-3"
-            outlined
-          >
-            COL
-          </v-card>
-        </v-col>
-        <v-col>
-          <v-card
-            class="pa-3"
-            outlined
-          >
-            COL
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-card>
-  </v-container>
+  <div>
+    <h1>Grid System</h1>
+    <!-- 여기에 GridSystem 컴포넌트의 템플릿 코드를 작성하세요 -->
+  </div>
 </template>
 
 <script>
-export default {}
+export default {
+  name: 'GridSystem',
+  // 여기에 컴포넌트 로직을 추가하세요
+}
 </script>
-<style lang="">
 
+<style scoped>
+/* 여기에 컴포넌트의 스타일을 추가하세요 */
 </style>

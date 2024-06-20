@@ -1,14 +1,10 @@
 <template>
-  <v-container
-    fluid
-  >
-    <v-card class="pa-3">
-      col
-    </v-card>
-  </v-container>
+  <div>
+    DashBoard Page
+  </div>
 </template>
 <script>
 export default {
-
+  
 }
 </script>
