@@ -1,7 +1,7 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="items"
+    :items="localItems"
     class="elevation-1"
     item-key="id"
     dense
@@ -41,6 +41,9 @@
 <script>
 export default {
   name: 'InquiryGrid',
+  props: {
+    items: Array,
+  },
   data() {
     return {
       dialog: false,
@@ -51,6 +54,7 @@ export default {
       defaultItem: {
         name: '',
       },
+      localItems: [],
       headers: [
         {text: '아이템 명', value: 'name', width: '100px'},
         {text: '품목코드', value: 'itemCode', width: '100px'},
@@ -75,67 +79,26 @@ export default {
         {text: '의뢰처2', value: 'client2', width: '100px'},
         {text: '액션', value: 'action', sortable: false, width: '70px'},
       ],
-      items: [
-        {
-          id: 1,
-          name: 'Item 1',
-          itemCode: '001',
-          productName: 'Product 1',
-          quantity: 10,
-          unit: 'EA',
-          salesUnitPriceKRW: 1000,
-          salesUnitPriceUSD: 1,
-          salesAmountKRW: 10000,
-          salesAmountUSD: 10,
-          margin: 10,
-          supplierCode: 'S001',
-          purchaseUnitPriceKRW: 900,
-          purchaseUnitPriceUSD: 0.9,
-          purchaseAmountKRW: 9000,
-          purchaseAmountUSD: 9,
-          print: 'N/A',
-          process: 'Pending',
-          deliveryDate: '2024-03-01',
-          remark: 'No remarks',
-          client1: 'Client 1',
-          client2: 'Client 2',
-        },
-        {
-          id: 2,
-          name: 'Item 2',
-          itemCode: '002',
-          productName: 'Product 2',
-          quantity: 20,
-          unit: 'EA',
-          salesUnitPriceKRW: 2000,
-          salesUnitPriceUSD: 2,
-          salesAmountKRW: 40000,
-          salesAmountUSD: 40,
-          margin: 20,
-          supplierCode: 'S002',
-          purchaseUnitPriceKRW: 1800,
-          purchaseUnitPriceUSD: 1.8,
-          purchaseAmountKRW: 36000,
-          purchaseAmountUSD: 36,
-          print: 'N/A',
-          process: 'Pending',
-          deliveryDate: '2024-03-02',
-          remark: 'No remarks',
-          client1: 'Client 3',
-          client2: 'Client 4',
-        },
-      ],
     };
+  },
+  watch: {
+    items: {
+      immediate: true,
+      handler(newItems) {
+        this.localItems = [...newItems];
+      },
+    },
   },
   methods: {
     editItem(item) {
-      this.editedIndex = this.items.indexOf(item);
+      this.editedIndex = this.localItems.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
     deleteItem(item) {
-      const index = this.items.indexOf(item);
-      confirm('Are you sure you want to delete this item?') && this.items.splice(index, 1);
+      if (confirm('Are you sure you want to delete this item?')) {
+        this.$emit('delete-item', item);
+      }
     },
     close() {
       this.dialog = false;
@@ -146,9 +109,9 @@ export default {
     },
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.items[this.editedIndex], this.editedItem);
+        this.$emit('update-item', {index: this.editedIndex, item: this.editedItem});
       } else {
-        this.items.push(this.editedItem);
+        this.$emit('add-item', this.editedItem);
       }
       this.close();
     },
