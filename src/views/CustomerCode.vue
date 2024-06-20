@@ -20,7 +20,11 @@
               <template v-slot:top>
                 <v-toolbar flat>
                   <v-toolbar-title>매출처 코드 목록</v-toolbar-title>
-                  <v-divider class="mx-4" inset vertical></v-divider>
+                  <v-divider
+                    class="mx-4"
+                    inset
+                    vertical
+                  ></v-divider>
                   <v-spacer></v-spacer>
                   <v-text-field
                     v-model="search"
@@ -39,20 +43,23 @@
       <v-col cols="4">
         <v-card class="rounded-card elevation-3">
           <v-card-title>
-            <v-icon class="mr-2" color="green" size="32">mdi-information</v-icon>
             매출처 정보
           </v-card-title>
           <v-card-text>
             <v-form>
-              <v-text-field label="코드" v-model="selectedCustomer.code" readonly></v-text-field>
-              <v-text-field label="사업자명" v-model="selectedCustomer.businessName" readonly></v-text-field>
-              <v-text-field label="연락처" v-model="selectedCustomer.contact" readonly></v-text-field>
-              <v-text-field label="담당자" v-model="selectedCustomer.contactPerson" readonly></v-text-field>
-              <v-text-field label="E-MAIL" v-model="selectedCustomer.email" readonly></v-text-field>
-              <v-text-field label="주소" v-model="selectedCustomer.address" readonly></v-text-field>
-              <v-text-field label="기타정보" v-model="selectedCustomer.extraInfo" readonly></v-text-field>
+              <v-text-field label="코드" v-model="selectedCustomer.code"></v-text-field>
+              <v-text-field label="사업자명" v-model="selectedCustomer.businessName"></v-text-field>
+              <v-text-field label="연락처" v-model="selectedCustomer.phone"></v-text-field>
+              <v-text-field label="담당자" v-model="selectedCustomer.contactPerson"></v-text-field>
+              <v-text-field label="E-MAIL" v-model="selectedCustomer.email"></v-text-field>
+              <v-text-field label="주소" v-model="selectedCustomer.address"></v-text-field>
+              <v-text-field label="기타정보" v-model="selectedCustomer.extraInfo"></v-text-field>
             </v-form>
           </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" @click="saveCustomer">저장</v-btn>
+          </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
@@ -86,7 +93,6 @@ export default {
           contact: '+91 22 49229009',
           extraInfo: '추가 정보 예시'
         },
-        // 예시 데이터 29개 추가
         ...Array.from({ length: 29 }, (_, i) => ({
           code: `CUST${i + 1}`,
           businessName: `Business ${i + 1}`,
@@ -102,10 +108,10 @@ export default {
       selectedCustomer: {
         code: '',
         businessName: '',
-        supplierCode: '',
-        address: '',
-        contact: '',
+        phone: '',
+        contactPerson: '',
         email: '',
+        address: '',
         extraInfo: '',
       }
     };
@@ -124,36 +130,24 @@ export default {
     selectCustomer(customer) {
       this.selectedCustomer = { ...customer };
     },
+    saveCustomer() {
+      const index = this.customers.findIndex(c => c.code === this.selectedCustomer.code);
+      if (index > -1) {
+        this.customers.splice(index, 1, this.selectedCustomer);
+      } else {
+        this.customers.push(this.selectedCustomer);
+      }
+      this.$emit('update:customer-list', this.customers);
+    },
+    closeDialog() {
+      this.$emit('close');
+    },
   },
 };
 </script>
 
 <style scoped>
-.v-card-title {
-  background-color: #f5f5f5;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-}
-
-.v-card-text {
-  padding-bottom: 20px;
-}
-
-.rounded-table {
-  border-radius: 16px;
-  overflow: hidden;
-}
-
 .rounded-table-content {
   border-radius: 16px !important;
-}
-
-.elevation-3 {
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.rounded-card {
-  border-radius: 16px;
 }
 </style>
