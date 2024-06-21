@@ -9,6 +9,7 @@ import EstimateManagement from "@/views/EstimateManagement.vue";
 import CustomerCode from "@/views/CustomerCode.vue";
 import SupplierCode from "@/views/SupplierCode.vue";
 import ShipCode from "@/views/ShipCode.vue";
+import EstimateListGrouped from "@/views/EstimateListGrouped.vue";
 
 Vue.use(VueRouter)
 
@@ -52,6 +53,11 @@ const routes = [
     path: "/ship-code",
     name: 'ship-code',
     component: ShipCode
+  },
+  {
+    path: "/estimate-grouped",
+    name: 'estimate-grouped',
+    component: EstimateListGrouped
   },
 ]
 

@@ -102,7 +102,16 @@
                 <v-col cols="3">
                   <v-text-field label="비고" v-model="remarks"></v-text-field>
                 </v-col>
-                <v-col cols="6" class="text-right">
+                <v-col cols="3">
+                  <v-text-field
+                      label="품목 코드"
+                      v-model="selectedProductCode"
+                      append-icon="mdi-magnify"
+                      readonly
+                      @click:append="openProductCodeDialog"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="3" class="text-right">
                   <v-btn color="primary" @click="addItem">추가</v-btn>
                 </v-col>
               </v-row>
@@ -132,6 +141,11 @@
     <v-dialog v-model="customerCodeDialog" max-width="800px">
       <CustomerCodeList @select-customer-code="selectCustomerCode" @close="customerCodeDialog = false" />
     </v-dialog>
+
+    <!-- 품목 코드 모달 -->
+    <v-dialog v-model="productCodeDialog" max-width="1200px">
+      <ProductCodeList @select-product-code="selectProductCode" @close="productCodeDialog = false" />
+    </v-dialog>
   </v-container>
 </template>
 
@@ -139,6 +153,7 @@
 import InquiryGrid from "@/views/InquiryGrid.vue";
 import ShipCodeList from "@/views/ShipCodeList.vue";
 import CustomerCodeList from "@/views/CustomerCodeList.vue";
+import ProductCodeList from "@/views/ProductCodeList.vue";
 
 export default {
   name: 'InquiryView',
@@ -146,6 +161,7 @@ export default {
     InquiryGrid,
     ShipCodeList,
     CustomerCodeList,
+    ProductCodeList,
   },
   data() {
     return {
@@ -162,8 +178,10 @@ export default {
       manager: '',
       refNumber: '',
       remarks: '',
+      selectedProductCode: '',
       shipCodeDialog: false,
       customerCodeDialog: false,
+      productCodeDialog: false,
       inquiryItems: [],
       hullNumbers: '',
       managers: ['Manager A', 'Manager B', 'Manager C'],
@@ -216,6 +234,9 @@ export default {
     openCustomerCodeDialog() {
       this.customerCodeDialog = true;
     },
+    openProductCodeDialog() {
+      this.productCodeDialog = true;
+    },
     selectShipCode(shipCode) {
       this.shippingCompany = shipCode.businessName;
       this.shipCodeDialog = false;
@@ -223,6 +244,10 @@ export default {
     selectCustomerCode(customer) {
       this.customer = customer.businessName;
       this.customerCodeDialog = false;
+    },
+    selectProductCode(product) {
+      this.selectedProductCode = product.itemCode;
+      this.productCodeDialog = false;
     },
   },
 };

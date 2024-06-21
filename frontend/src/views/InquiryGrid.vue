@@ -1,7 +1,7 @@
 <template>
   <v-data-table
       :headers="headers"
-      :items="localItems"
+      :items="items"
       class="elevation-1"
       item-key="id"
       dense
@@ -9,26 +9,7 @@
     <template v-slot:top>
       <v-toolbar flat>
         <v-toolbar-title>품목사항</v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
-        <v-dialog v-model="dialog" max-width="600px">
-          <v-card>
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="12">
-                    <v-text-field label="아이템 명" v-model="editedItem.name"></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="close">취소</v-btn>
-              <v-btn color="blue darken-1" text @click="save">저장</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
       </v-toolbar>
     </template>
     <template v-slot:[`item.action`]="{ item }">
@@ -42,62 +23,52 @@
 export default {
   name: 'InquiryGrid',
   props: {
-    items: Array,
+    items: {
+      type: Array,
+      required: true,
+    },
   },
   data() {
     return {
       dialog: false,
       editedIndex: -1,
-      editedItem: {
-        name: '',
-      },
-      defaultItem: {
-        name: '',
-      },
-      localItems: [],
+      editedItem: {},
+      defaultItem: {},
       headers: [
-        {text: '아이템 명', value: 'name', width: '100px'},
-        {text: '품목코드', value: 'itemCode', width: '100px'},
-        {text: '품명', value: 'productName', width: '150px'},
-        {text: '수량', value: 'quantity', width: '70px'},
-        {text: '단위', value: 'unit', width: '70px'},
-        {text: '매출단가(₩)', value: 'salesUnitPriceKRW', width: '100px'},
-        {text: '매출단가($)', value: 'salesUnitPriceUSD', width: '100px'},
-        {text: '매출금액(₩)', value: 'salesAmountKRW', width: '100px'},
-        {text: '매출금액($)', value: 'salesAmountUSD', width: '100px'},
-        {text: '마진', value: 'margin', width: '70px'},
-        {text: '매입처코드', value: 'supplierCode', width: '100px'},
-        {text: '매입단가(₩)', value: 'purchaseUnitPriceKRW', width: '100px'},
-        {text: '매입단가($)', value: 'purchaseUnitPriceUSD', width: '100px'},
-        {text: '매입금액(₩)', value: 'purchaseAmountKRW', width: '100px'},
-        {text: '매입금액($)', value: 'purchaseAmountUSD', width: '100px'},
-        {text: '출력', value: 'print', width: '70px'},
-        {text: '처리', value: 'process', width: '100px'},
-        {text: '납기', value: 'deliveryDate', width: '100px'},
-        {text: '비고', value: 'remark', width: '150px'},
-        {text: '의뢰처1', value: 'client1', width: '100px'},
-        {text: '의뢰처2', value: 'client2', width: '100px'},
-        {text: '액션', value: 'action', sortable: false, width: '70px'},
+        { text: '아이템 명', value: 'name' },
+        { text: '품목코드', value: 'itemCode' },
+        { text: '품명', value: 'productName' },
+        { text: '수량', value: 'quantity' },
+        { text: '단위', value: 'unit' },
+        { text: '매출단가(₩)', value: 'salesUnitPriceKRW' },
+        { text: '매출단가($)', value: 'salesUnitPriceUSD' },
+        { text: '매출금액(₩)', value: 'salesAmountKRW' },
+        { text: '매출금액($)', value: 'salesAmountUSD' },
+        { text: '마진', value: 'margin' },
+        { text: '매입처코드', value: 'supplierCode' },
+        { text: '매입단가(₩)', value: 'purchaseUnitPriceKRW' },
+        { text: '매입단가($)', value: 'purchaseUnitPriceUSD' },
+        { text: '매입금액(₩)', value: 'purchaseAmountKRW' },
+        { text: '매입금액($)', value: 'purchaseAmountUSD' },
+        { text: '출력', value: 'print' },
+        { text: '처리', value: 'process' },
+        { text: '납기', value: 'deliveryDate' },
+        { text: '비고', value: 'remark' },
+        { text: '액션', value: 'action', sortable: false },
       ],
     };
   },
-  watch: {
-    items: {
-      immediate: true,
-      handler(newItems) {
-        this.localItems = [...newItems];
-      },
-    },
-  },
   methods: {
     editItem(item) {
-      this.editedIndex = this.localItems.indexOf(item);
+      this.editedIndex = this.items.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
     deleteItem(item) {
+      const index = this.items.indexOf(item);
       if (confirm('Are you sure you want to delete this item?')) {
-        this.$emit('delete-item', item);
+        //this.items.splice(index, 1);
+        this.$emit('update:item', { index, item: this.items[index] });
       }
     },
     close() {
@@ -109,9 +80,11 @@ export default {
     },
     save() {
       if (this.editedIndex > -1) {
-        this.$emit('update-item', {index: this.editedIndex, item: this.editedItem});
+        Object.assign(this.items[this.editedIndex], this.editedItem);
+        this.$emit('update:item', { index: this.editedIndex, item: this.items[this.editedIndex] });
       } else {
-        this.$emit('add-item', this.editedItem);
+        //this.items.push(this.editedItem);
+        this.$emit('add:item', this.editedItem);
       }
       this.close();
     },
@@ -120,5 +93,16 @@ export default {
 </script>
 
 <style scoped>
-/* 스타일을 여기에 작성하세요 */
+.v-card-title {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.v-card-text {
+  padding-bottom: 20px;
+}
+
+.rounded-table-content {
+  border-radius: 16px !important;
+}
 </style>
