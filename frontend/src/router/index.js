@@ -10,6 +10,7 @@ import CustomerCode from "@/views/CustomerCode.vue";
 import SupplierCode from "@/views/SupplierCode.vue";
 import ShipCode from "@/views/ShipCode.vue";
 import EstimateListGrouped from "@/views/EstimateListGrouped.vue";
+import Kanban from "@/views/Kanban.vue";
 
 Vue.use(VueRouter)
 
@@ -58,6 +59,11 @@ const routes = [
     path: "/estimate-grouped",
     name: 'estimate-grouped',
     component: EstimateListGrouped
+  },
+  {
+    path: "/kanban",
+    name: 'kanban',
+    component: Kanban
   },
 ]
 

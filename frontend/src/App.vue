@@ -75,9 +75,10 @@ export default {
       { title: '매출처 코드 목록', icon: 'mdi-invoice-arrow-right-outline', to: '/customer-code' },
       { title: '매입처 코드 목록', icon: 'mdi-invoice-arrow-left', to: '/supplier-code' },
       { title: '선박 코드 목록', icon: 'mdi-ferry', to: '/ship-code' },
-      { title: 'User Profile', icon: 'mdi-account', to: '/profile' },
+      { title: 'KanBan', icon: 'mdi mdi-bulletin-board', to: '/kanban' },
+      { title: 'EstimateGrouped', icon: 'mdi mdi-folder-table-outline', to: '/estimate-grouped' },
       { title: 'Forms', icon: 'mdi-account', to: '/forms' },
-      { title: 'EstimateGrouped', icon: 'mdi-account', to: '/estimate-grouped' }
+      { title: 'User Profile', icon: 'mdi-account', to: '/profile' }
     ],
   }),
   methods: {
