@@ -30,6 +30,35 @@
           </v-list-item-content>
         </v-list-item>
         <v-divider></v-divider>
+        <!-- 견적관리 그룹 -->
+        <v-list-group
+            v-model="expanded"
+            prepend-icon="mdi-folder"
+            append-icon="mdi-menu-down"
+        >
+          <template v-slot:activator>
+            <v-list-item-content>
+              <v-list-item-title class="white--text">견적관리</v-list-item-title>
+            </v-list-item-content>
+          </template>
+          <v-list-item link :to="'/inquiry'" class="sub-item">
+            <v-list-item-icon>
+              <v-icon class="white--text">mdi-table</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="white--text">견적 신규 생성</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item link :to="'/estimateManagement'" class="sub-item">
+            <v-list-item-icon>
+              <v-icon class="white--text">mdi-table</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="white--text">견적 관리</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-group>
+        <!-- 나머지 메뉴 항목들 -->
         <v-list-item
             v-for="item in items"
             :key="item.title"
@@ -70,8 +99,6 @@ export default {
     profileMenu: false,
     items: [
       { title: 'Dashboard', icon: 'mdi-view-dashboard', to: '/' },
-      { title: 'Inquiry', icon: 'mdi-table', to: '/inquiry' },
-      { title: 'EstimateManagement', icon: 'mdi-table', to: '/estimateManagement' },
       { title: '매출처 코드 목록', icon: 'mdi-invoice-arrow-right-outline', to: '/customer-code' },
       { title: '매입처 코드 목록', icon: 'mdi-invoice-arrow-left', to: '/supplier-code' },
       { title: '선박 코드 목록', icon: 'mdi-ferry', to: '/ship-code' },
@@ -93,5 +120,8 @@ export default {
 <style>
 .navigation-drawer {
   background-color: #212121;
+}
+.sub-item {
+  padding-left: 32px; /* 하위 메뉴 항목에 대한 들여쓰기 */
 }
 </style>
