@@ -104,8 +104,7 @@ export default {
       { title: '선박 코드 목록', icon: 'mdi-ferry', to: '/ship-code' },
       { title: 'KanBan', icon: 'mdi mdi-bulletin-board', to: '/kanban' },
       { title: 'EstimateGrouped', icon: 'mdi mdi-folder-table-outline', to: '/estimate-grouped' },
-      { title: 'Forms', icon: 'mdi-account', to: '/forms' },
-      { title: 'User Profile', icon: 'mdi-account', to: '/profile' }
+      { title: 'Forms', icon: 'mdi-account', to: '/forms' }
     ],
   }),
   methods: {

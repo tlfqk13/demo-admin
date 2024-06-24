@@ -10,6 +10,7 @@
       <v-toolbar flat>
         <v-toolbar-title>품목사항</v-toolbar-title>
         <v-spacer></v-spacer>
+        <v-btn color="primary" @click="createQuotation">생성</v-btn>
       </v-toolbar>
     </template>
     <template v-slot:[`item.action`]="{ item }">
@@ -65,29 +66,13 @@ export default {
       this.dialog = true;
     },
     deleteItem(item) {
-      const index = this.items.indexOf(item);
       if (confirm('Are you sure you want to delete this item?')) {
-        //this.items.splice(index, 1);
-        this.$emit('update:item', { index, item: this.items[index] });
+        this.$emit('delete:item', item);
       }
     },
-    close() {
-      this.dialog = false;
-      setTimeout(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      }, 300);
-    },
-    save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.$emit('update:item', { index: this.editedIndex, item: this.items[this.editedIndex] });
-      } else {
-        //this.items.push(this.editedItem);
-        this.$emit('add:item', this.editedItem);
-      }
-      this.close();
-    },
+    createQuotation() {
+      this.$emit('create:quotation');
+    }
   },
 };
 </script>

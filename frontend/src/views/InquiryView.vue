@@ -128,6 +128,7 @@
             :items="inquiryItems"
             @update:item="updateItem"
             @delete:item="deleteItem"
+            @create:quotation="createQuotation"
         />
       </v-col>
     </v-row>
@@ -202,11 +203,29 @@ export default {
         manager: this.manager,
         refNumber: this.refNumber,
         remarks: this.remarks,
+        itemCode: this.selectedProductCode, // 추가된 필드
+        productName: 'Example Product', // 필요 시 변경
+        quantity: 0,
+        unit: '',
+        salesUnitPriceKRW: 0,
+        salesUnitPriceUSD: 0,
+        salesAmountKRW: 0,
+        salesAmountUSD: 0,
+        margin: 0,
+        supplierCode: '',
+        purchaseUnitPriceKRW: 0,
+        purchaseUnitPriceUSD: 0,
+        purchaseAmountKRW: 0,
+        purchaseAmountUSD: 0,
+        print: '',
+        process: '',
+        deliveryDate: '',
+        remark: '',
       };
       this.inquiryItems.push(newItem);
       this.clearForm();
     },
-    updateItem({index, item}) {
+    updateItem({ index, item }) {
       this.inquiryItems.splice(index, 1, item);
     },
     deleteItem(item) {
@@ -227,6 +246,7 @@ export default {
       this.manager = '';
       this.refNumber = '';
       this.remarks = '';
+      this.selectedProductCode = '';
     },
     openShipCodeDialog() {
       this.shipCodeDialog = true;
@@ -249,6 +269,10 @@ export default {
       this.selectedProductCode = product.itemCode;
       this.productCodeDialog = false;
     },
+    createQuotation() {
+      // 견적서 생성 로직을 여기에 추가합니다.
+      console.log("견적서가 생성되었습니다:", this.inquiryItems);
+    }
   },
 };
 </script>
