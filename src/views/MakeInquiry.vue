@@ -3,26 +3,31 @@
     <v-container>
       <v-form @submit.prevent="submitForm">
         <v-row>
-          <v-col cols="12" md="2">
+          <v-col cols="12" md="3">
             <v-text-field v-model="companyName" label="Company Name"></v-text-field>
           </v-col>
-          <v-col cols="12" md="2">
+          <v-col cols="12" md="3">
             <v-text-field v-model="vesselName" label="Vessel Name"></v-text-field>
           </v-col>
-          <v-col cols="12" md="2">
+          <v-col cols="12" md="3">
             <v-text-field v-model="refNumber" label="Reference Number" :readonly="true"></v-text-field>
           </v-col>
-          <v-col cols="12" md="2">
+          <v-col cols="12" md="3">
             <v-text-field v-model="date" label="Date" type="date"></v-text-field>
           </v-col>
-          <v-col cols="12" md="2">
+          <v-col cols="12" md="6">
             <v-text-field v-model="mfg" label="MFG"></v-text-field>
           </v-col>
-          <v-col cols="12" md="2">
+          <v-col cols="12" md="6">
             <v-text-field v-model="type" label="TYPE"></v-text-field>
           </v-col>
           <v-col cols="12">
-            <v-textarea v-model="headerMessage" label="Header" rows="4"></v-textarea>
+            <v-card class="mb-4">
+              <v-card-title>Header</v-card-title>
+              <v-card-text>
+                <v-textarea v-model="headerMessage" rows="3"></v-textarea>
+              </v-card-text>
+            </v-card>
           </v-col>
         </v-row>
 
@@ -197,6 +202,10 @@ export default {
 
                 .header-message {
                     white-space: pre-wrap;
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    margin-bottom: 20px;
+                    background-color: #f9f9f9;
                 }
             </style>
         </head>
@@ -224,21 +233,21 @@ export default {
                 <div>FAX:</div>
             </div>
             <div class="right">
-                <div>OUR REF No: {{refNumber}}</div>
+                <div>OUR REF No.: {{refNumber}}</div>
                 <div>DATE: {{date}}</div>
             </div>
         </div>
 
         <div class="line"></div>
 
-        <p class="header-message">${headerLines}</p>
+        <div class="header-message">${headerLines}</div>
 
         <table>
             <thead>
             <tr>
                 <th colspan="7">
                     MFG: ${this.mfg}<br>
-                    TYPE: ${this.type}
+                    TYPE: ${this.type}, SERIAL NO.: A5-E1436
                 </th>
             </tr>
             <tr>
