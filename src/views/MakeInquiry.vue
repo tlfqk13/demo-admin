@@ -10,7 +10,7 @@
             <v-text-field v-model="vesselName" label="Vessel Name"></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model="refNumber" label="Reference Number" :readonly="true"></v-text-field>
+            <v-text-field v-model="refNumber" label="Reference Number" :readonly="false"></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
             <v-text-field v-model="date" label="Date" type="date"></v-text-field>
@@ -87,11 +87,9 @@ export default {
       type: '',
       headerMessage: '1. 귀사의 무궁한 발전을 기원합니다.\n2. 하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.',
       items: [
-        { code: 'code1', description: 'description1', qty: 1, unit: 'pcs', uprice: 0, amount: 0 },
-        { code: 'code2', description: 'description2', qty: 2, unit: 'pcs', uprice: 0, amount: 0 },
-        { code: 'code3', description: 'description3', qty: 3, unit: 'pcs', uprice: 0, amount: 0 },
-        { code: 'code4', description: 'description4', qty: 4, unit: 'pcs', uprice: 0, amount: 0 },
-        { code: 'code5', description: 'description5', qty: 5, unit: 'pcs', uprice: 0, amount: 0 }
+        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0 },
+        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0 },
+        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0 }
       ]
     };
   },
@@ -247,7 +245,7 @@ export default {
             <tr>
                 <th colspan="7">
                     MFG: ${this.mfg}<br>
-                    TYPE: ${this.type}, SERIAL NO.: A5-E1436
+                    TYPE: ${this.type}
                 </th>
             </tr>
             <tr>
