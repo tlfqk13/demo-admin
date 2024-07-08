@@ -10,6 +10,7 @@ import CustomerCode from "@/views/CustomerCode.vue";
 import SupplierCode from "@/views/SupplierCode.vue";
 import ShipCode from "@/views/ShipCode.vue";
 import MakeInquiry from "@/views/MakeInquiry.vue";
+import EmailForm from "@/views/EmailForm.vue";
 
 Vue.use(VueRouter)
 
@@ -58,6 +59,11 @@ const routes = [
     path: "/make-inquiry",
     name: 'make-inquiry',
     component: MakeInquiry
+  },
+  {
+    path: "/send-email",
+    name: 'send-email',
+    component: EmailForm
   },
 ]
 

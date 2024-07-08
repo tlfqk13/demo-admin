@@ -51,14 +51,6 @@
           <v-col cols="12" md="3">
             <v-text-field v-model="type" label="TYPE"></v-text-field>
           </v-col>
-          <v-col cols="12">
-            <v-card class="mb-4">
-              <v-card-title>Header</v-card-title>
-              <v-card-text>
-                <v-textarea v-model="headerMessage" rows="3"></v-textarea>
-              </v-card-text>
-            </v-card>
-          </v-col>
         </v-row>
 
         <v-btn type="button" @click="addItem" color="primary" class="mb-4">Add Item</v-btn>
@@ -96,6 +88,10 @@
       </v-form>
 
       <div class="preview" v-html="generateHtmlTemplate(lineHeightNormal)"></div>
+
+      <!-- EmailForm 컴포넌트를 하단에 추가 -->
+      <email-form class="mt-4"></email-form>
+
     </v-container>
   </v-app>
 </template>
@@ -104,12 +100,16 @@
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import Handlebars from 'handlebars';
+import EmailForm from '@/views/EmailForm.vue'; // EmailForm 컴포넌트를 import
 
 // 이미지 경로를 require를 사용하여 불러오기
 const logoPath = require('@/assets/baskorea_logo.png');
 
 export default {
-  name: "QuotationRequest",
+  name: "MakeInquiry",
+  components: {
+    EmailForm // 컴포넌트를 등록
+  },
   data() {
     return {
       companyName: '',
@@ -120,9 +120,9 @@ export default {
       type: '',
       headerMessage: '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.',
       items: [
-        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' },
-        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' },
-        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' }
+        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
+        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
+        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''}
       ],
       lineHeightNormal: 1.2,
       lineHeightCompact: 0.3,
@@ -146,16 +146,16 @@ export default {
       return `${yyyy}${mm}${dd}-${uniqueNumber}`;
     },
     addItem() {
-      this.items.push({ code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' });
+      this.items.push({code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''});
     },
     handleFileUpload() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
+        const workbook = XLSX.read(data, {type: 'array'});
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
-        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
 
         // Setting items from Excel data (skipping the header row)
         this.items = json.slice(1).map(row => ({
@@ -375,6 +375,7 @@ export default {
   margin-bottom: 16px;
   color: #333;
 }
+
 .preview {
   border: 1px solid #ccc;
   padding: 16px;

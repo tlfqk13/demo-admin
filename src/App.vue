@@ -100,7 +100,8 @@ export default {
       { title: '선박 코드 목록', icon: 'mdi-ferry', to: '/ship-code' },
       { title: 'User Profile', icon: 'mdi-account', to: '/profile' },
       { title: 'Forms', icon: 'mdi-account', to: '/forms' },
-      { title: 'Make Inquiry', icon: 'mdi-account', to: '/make-inquiry' }
+      { title: 'Make Inquiry', icon: 'mdi-account', to: '/make-inquiry' },
+      { title: 'Send Email', icon: 'mdi-account', to: '/send-email' }
     ],
     userMenu: false, // 사용자 메뉴의 열림/닫힘 상태를 저장하는 데이터 속성
   }),
