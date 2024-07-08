@@ -3,6 +3,14 @@
     <v-container>
       <v-form @submit.prevent="submitForm">
         <v-row>
+          <v-col cols="12">
+            <v-file-input
+              v-model="file"
+              label="Upload Excel File"
+              @change="handleFileUpload"
+              accept=".xlsx, .xls"
+            ></v-file-input>
+          </v-col>
           <v-col cols="12" md="3">
             <v-text-field v-model="companyName" label="Company Name"></v-text-field>
           </v-col>
@@ -72,6 +80,7 @@
 
 <script>
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 import Handlebars from 'handlebars';
 
 // 이미지 경로를 require를 사용하여 불러오기
@@ -89,12 +98,13 @@ export default {
       type: '',
       headerMessage: '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.',
       items: [
-        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' },
-        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' },
-        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' }
+        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
+        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
+        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''}
       ],
       lineHeightNormal: 1.2,
-      lineHeightCompact: 0.3
+      lineHeightCompact: 0.3,
+      file: null
     };
   },
   methods: {
@@ -114,7 +124,29 @@ export default {
       return `${yyyy}${mm}${dd}-${uniqueNumber}`;
     },
     addItem() {
-      this.items.push({ code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' });
+      this.items.push({code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''});
+    },
+    handleFileUpload() {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+
+        // Setting items from Excel data (skipping the header row)
+        this.items = json.slice(1).map(row => ({
+          code: row[0] || '',
+          description: row[1] || '',
+          qty: row[2] || 0,
+          unit: row[3] || '',
+          uprice: row[4] || 0,
+          amount: row[5] || 0,
+          notes: row[6] || ''
+        }));
+      };
+      reader.readAsArrayBuffer(this.file);
     },
     generateHtmlTemplate(lineHeight) {
       const headerLines = this.headerMessage.split('\n').map(line => `<div>${line}</div>`).join('');
