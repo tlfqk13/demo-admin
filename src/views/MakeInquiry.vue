@@ -1,16 +1,38 @@
 <template>
   <v-app>
     <v-container>
+      <v-card class="pa-3 mb-4">
+        <v-card-title class="section-title">
+          <v-icon class="mr-2">mdi-lightbulb-on-outline</v-icon>
+          Smart options to fill your Quotation automatically!
+        </v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-card outlined>
+                <v-card-title>
+                  <v-icon class="mr-2">mdi-file-excel</v-icon>
+                  Excel file
+                </v-card-title>
+                <v-card-text>
+                  xls template to quote your prices easily
+                </v-card-text>
+                <v-card-actions>
+                  <v-file-input
+                    v-model="file"
+                    label="Upload Excel File"
+                    @change="handleFileUpload"
+                    accept=".xlsx, .xls"
+                  ></v-file-input>
+                </v-card-actions>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+
       <v-form @submit.prevent="submitForm">
         <v-row>
-          <v-col cols="12">
-            <v-file-input
-              v-model="file"
-              label="Upload Excel File"
-              @change="handleFileUpload"
-              accept=".xlsx, .xls"
-            ></v-file-input>
-          </v-col>
           <v-col cols="12" md="3">
             <v-text-field v-model="companyName" label="Company Name"></v-text-field>
           </v-col>
@@ -98,9 +120,9 @@ export default {
       type: '',
       headerMessage: '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.',
       items: [
-        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
-        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
-        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''}
+        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' },
+        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' },
+        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' }
       ],
       lineHeightNormal: 1.2,
       lineHeightCompact: 0.3,
@@ -124,16 +146,16 @@ export default {
       return `${yyyy}${mm}${dd}-${uniqueNumber}`;
     },
     addItem() {
-      this.items.push({code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''});
+      this.items.push({ code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' });
     },
     handleFileUpload() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type: 'array'});
+        const workbook = XLSX.read(data, { type: 'array' });
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
-        const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
         // Setting items from Excel data (skipping the header row)
         this.items = json.slice(1).map(row => ({
@@ -343,6 +365,16 @@ export default {
 </script>
 
 <style>
+.section-title {
+  background-color: #00f18d;
+  padding: 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 16px;
+  color: #333;
+}
 .preview {
   border: 1px solid #ccc;
   padding: 16px;
