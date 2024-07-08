@@ -58,7 +58,7 @@
         size="large"
         variant="tonal"
         block
-        @click="signInWithGoogle"
+        @click="signInWithKakao"
       >
         <v-icon left>mdi-chat</v-icon>
         카카오톡으로 로그인
@@ -74,6 +74,7 @@
     </v-card>
   </div>
 </template>
+
 <script>
 export default {
   name: 'FormsTest',
@@ -82,8 +83,17 @@ export default {
   }),
   methods: {
     signInWithGoogle() {
-      // Google 로그인 로직 구현
-      console.log('Sign in with Google clicked');
+      const form = document.createElement('form');
+      form.setAttribute('id', 'google-login-form');
+      form.setAttribute('action', 'http://localhost:8888/oauth2/authorization/google');
+      form.setAttribute('method', 'get');
+      form.style.display = 'none';
+      document.body.appendChild(form);
+      form.submit();
+    },
+    signInWithKakao() {
+      // Kakao 로그인 로직 구현
+      console.log('Sign in with Kakao clicked');
     }
   }
 }

@@ -10,15 +10,15 @@
             <v-text-field v-model="vesselName" label="Vessel Name"></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model="refNumber" label="Reference Number" :readonly="false"></v-text-field>
+            <v-text-field v-model="refNumber" label="Reference Number" :readonly="true"></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
             <v-text-field v-model="date" label="Date" type="date"></v-text-field>
           </v-col>
-          <v-col cols="12" md="6">
-            <v-text-field v-model="mfg" label="MFG"></v-text-field>
+          <v-col cols="12" md="3">
+            <v-text-field v-model="maker" label="MAKER"></v-text-field>
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="3">
             <v-text-field v-model="type" label="TYPE"></v-text-field>
           </v-col>
           <v-col cols="12">
@@ -44,6 +44,7 @@
               <th>UNIT</th>
               <th>U/PRICE</th>
               <th>AMOUNT</th>
+              <th>NOTES</th>
             </tr>
             </thead>
             <tbody>
@@ -55,6 +56,7 @@
               <td><v-text-field v-model="item.unit" dense></v-text-field></td>
               <td><v-text-field v-model="item.uprice" type="number" dense></v-text-field></td>
               <td><v-text-field v-model="item.amount" type="number" dense></v-text-field></td>
+              <td><v-textarea v-model="item.notes" rows="1" dense></v-textarea></td>
             </tr>
             </tbody>
           </template>
@@ -63,7 +65,7 @@
         <v-btn type="submit" color="primary" class="mt-4">Generate and Send</v-btn>
       </v-form>
 
-      <div class="preview" v-html="generateHtmlTemplate()"></div>
+      <div class="preview" v-html="generateHtmlTemplate(lineHeightNormal)"></div>
     </v-container>
   </v-app>
 </template>
@@ -83,14 +85,16 @@ export default {
       vesselName: '',
       refNumber: this.generateReferenceNumber(),
       date: this.getCurrentDate(),
-      mfg: '',
+      maker: '',
       type: '',
-      headerMessage: '1. 귀사의 무궁한 발전을 기원합니다.\n2. 하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.',
+      headerMessage: '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.',
       items: [
-        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0 },
-        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0 },
-        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0 }
-      ]
+        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' },
+        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' },
+        { code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' }
+      ],
+      lineHeightNormal: 1.2,
+      lineHeightCompact: 0.3
     };
   },
   methods: {
@@ -110,9 +114,9 @@ export default {
       return `${yyyy}${mm}${dd}-${uniqueNumber}`;
     },
     addItem() {
-      this.items.push({ code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0 });
+      this.items.push({ code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '' });
     },
-    generateHtmlTemplate() {
+    generateHtmlTemplate(lineHeight) {
       const headerLines = this.headerMessage.split('\n').map(line => `<div>${line}</div>`).join('');
 
       const templateString = `
@@ -204,6 +208,7 @@ export default {
                     padding: 8px;
                     margin-bottom: 20px;
                     background-color: #f9f9f9;
+                    line-height: ${lineHeight}; /* 줄 간격 설정 */
                 }
             </style>
         </head>
@@ -228,10 +233,9 @@ export default {
             <div class="left">
                 <div>MESSRS: {{companyName}}</div>
                 <div>VESSEL: {{vesselName}}</div>
-                <div>FAX:</div>
             </div>
             <div class="right">
-                <div>OUR REF No.: {{refNumber}}</div>
+                <div>OUR REF No: {{refNumber}}</div>
                 <div>DATE: {{date}}</div>
             </div>
         </div>
@@ -243,8 +247,8 @@ export default {
         <table>
             <thead>
             <tr>
-                <th colspan="7">
-                    MFG: ${this.mfg}<br>
+                <th colspan="8">
+                    MAKER: ${this.maker}<br>
                     TYPE: ${this.type}
                 </th>
             </tr>
@@ -256,6 +260,7 @@ export default {
                 <th>UNIT</th>
                 <th>U/PRICE</th>
                 <th>AMOUNT</th>
+                <th>NOTES</th>
             </tr>
             </thead>
             <tbody>
@@ -268,6 +273,7 @@ export default {
                 <td>{{this.unit}}</td>
                 <td>{{this.uprice}}</td>
                 <td>{{this.amount}}</td>
+                <td>{{this.notes}}</td>
             </tr>
             {{/each}}
             </tbody>
@@ -288,7 +294,7 @@ export default {
       });
     },
     async submitForm() {
-      const htmlContent = this.generateHtmlTemplate();
+      const htmlContent = this.generateHtmlTemplate(this.lineHeightCompact);
       try {
         const response = await axios.post('http://127.0.0.1:8888/api/convert-and-upload-pdf', htmlContent, {
           headers: {
