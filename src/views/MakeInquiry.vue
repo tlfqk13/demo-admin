@@ -9,7 +9,7 @@
         <v-card-text>
           <v-row>
             <v-col cols="12" md="6">
-              <v-card outlined class="equal-card">
+              <v-card outlined>
                 <v-card-title>
                   <v-icon class="mr-2">mdi-file-excel</v-icon>
                   Excel file
@@ -27,9 +27,9 @@
                 </v-card-actions>
               </v-card>
             </v-col>
-            <v-col cols="12" md="6">
-              <v-card outlined class="equal-card">
-                <v-card-title>Header</v-card-title>
+            <v-col cols="12" md = "6">
+              <v-card outlined>
+              <v-card-title>Header</v-card-title>
                 <v-card-text>
                   <v-textarea v-model="headerMessage" rows="3"></v-textarea>
                 </v-card-text>
@@ -383,12 +383,7 @@ export default {
   margin-bottom: 16px;
   color: #333;
 }
-.equal-card {
-  min-height: 200px; /* 원하는 높이로 설정 */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
+
 .preview {
   border: 1px solid #ccc;
   padding: 16px;
