@@ -27,9 +27,9 @@
                 </v-card-actions>
               </v-card>
             </v-col>
-            <v-col cols="12" md = "6">
+            <v-col cols="12" md="6">
               <v-card outlined>
-              <v-card-title>Header</v-card-title>
+                <v-card-title>Header</v-card-title>
                 <v-card-text>
                   <v-textarea v-model="headerMessage" rows="3"></v-textarea>
                 </v-card-text>
@@ -358,12 +358,33 @@ export default {
     async submitForm() {
       const htmlContent = this.generateHtmlTemplate(this.lineHeightCompact);
       try {
-        const response = await axios.post('http://127.0.0.1:8888/api/convert-and-upload-pdf', htmlContent, {
+        const pdfResponse = await axios.post('http://127.0.0.1:8888/api/convert-and-upload-pdf', htmlContent, {
           headers: {
             'Content-Type': 'text/plain'
           }
         });
-        console.log('Response:', response.data);
+
+        if (!pdfResponse.data || !pdfResponse.data.pdfUrl) {
+          throw new Error("PDF URL is missing in the response");
+        }
+
+        const pdfUrl = pdfResponse.data.pdfUrl; // Assuming your backend returns the URL of the uploaded PDF
+
+        // Now send the form data along with the PDF URL to your backend
+        const customerInquiry = {
+          companyName: this.companyName,
+          vesselName: this.vesselName,
+          refNumber: this.refNumber,
+          date: this.date,
+          maker: this.maker,
+          type: this.type,
+          headerMessage: this.headerMessage,
+          items: this.items,
+          pdfUrl: pdfUrl
+        };
+
+        const response = await axios.post('http://127.0.0.1:8888/api/customer-inquiries', customerInquiry);
+        console.log('Customer Inquiry Response:', response.data);
       } catch (error) {
         console.error('Error sending request:', error);
       }

@@ -12,7 +12,6 @@
       max-width="448"
       rounded="lg"
     >
-
       <v-text-field
         density="compact"
         placeholder="이메일 주소 또는 아이디"
@@ -63,7 +62,7 @@
         <v-icon left>mdi-chat</v-icon>
         카카오톡으로 로그인
       </v-btn>
-      <!-- 추가된 텍스트 버튼들 -->
+
       <v-card-text class="text-center">
         <a class="text-decoration-none mx-2" href="#" rel="noopener noreferrer">이메일 가입</a>
         <v-divider vertical></v-divider>
@@ -85,15 +84,26 @@ export default {
     signInWithGoogle() {
       const form = document.createElement('form');
       form.setAttribute('id', 'google-login-form');
-      form.setAttribute('action', 'http://localhost:8888/oauth2/authorization/google');
+      form.setAttribute('action', 'http://localhost:8888/api/oauth2/authorization/google');
       form.setAttribute('method', 'get');
       form.style.display = 'none';
       document.body.appendChild(form);
       form.submit();
     },
     signInWithKakao() {
-      // Kakao 로그인 로직 구현
       console.log('Sign in with Kakao clicked');
+    },
+    handleAuthSuccess(accessToken) {
+      console.log('Access Token:', accessToken);
+      localStorage.setItem('accessToken', accessToken);
+      this.$router.push('/dashboard');
+    }
+  },
+  mounted() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('accessToken');
+    if (accessToken) {
+      this.handleAuthSuccess(accessToken);
     }
   }
 }

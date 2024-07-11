@@ -94,7 +94,7 @@ export default {
     drawer: false,
     expanded: true, // 견적관리 그룹의 확장 상태를 저장하는 데이터 속성
     items: [
-      { title: 'Dashboard', icon: 'mdi-view-dashboard', to: '/' },
+      { title: 'Dashboard', icon: 'mdi-view-dashboard', to: '/dashboard' },
       { title: '매출처 코드 목록', icon: 'mdi-invoice-arrow-right-outline', to: '/customer-code' },
       { title: '매입처 코드 목록', icon: 'mdi-invoice-arrow-left', to: '/supplier-code' },
       { title: '선박 코드 목록', icon: 'mdi-ferry', to: '/ship-code' },

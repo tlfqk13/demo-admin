@@ -143,8 +143,10 @@
   </v-container>
 </template>
 <script>
-const exhale = ms =>
-  new Promise(resolve => setTimeout(resolve, ms))
+import apiService from '@/services/apiService';
+
+const exhale = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 export default {
   name: 'DashboardTest',
   data: () => ({
@@ -261,35 +263,56 @@ export default {
   }),
   computed: {
     avg() {
-      const sum = this.heartbeats.reduce((acc, cur) => acc + cur, 0)
-      const length = this.heartbeats.length
+      const sum = this.heartbeats.reduce((acc, cur) => acc + cur, 0);
+      const length = this.heartbeats.length;
 
-      if (!sum && !length) return 0
+      if (!sum && !length) return 0;
 
-      return Math.ceil(sum / length)
+      return Math.ceil(sum / length);
     },
   },
-
   created() {
-    this.takePulse(false)
+    this.takePulse(false);
+    this.fetchData();  // 데이터 가져오기 메서드 호출
   },
-
   methods: {
     heartbeat() {
-      return Math.ceil(Math.random() * (120 - 80) + 80)
+      return Math.ceil(Math.random() * (120 - 80) + 80);
     },
     async takePulse(inhale = true) {
-      this.checking = true
+      this.checking = true;
 
-      inhale && await exhale(1000)
+      inhale && await exhale(1000);
 
-      this.heartbeats = Array.from({length: 20}, this.heartbeat)
+      this.heartbeats = Array.from({ length: 20 }, this.heartbeat);
 
-      this.checking = false
+      this.checking = false;
     },
+    fetchData() {
+      apiService.get('/protected-endpoint')
+        .then(response => {
+          this.data = response.data;
+        })
+        .catch(error => {
+          console.error('오류가 발생했습니다!', error);
+        });
+    }
   },
 }
 </script>
-<style lang="">
+<style scoped>
+.login-with-google-btn {
+  background-color: #4285F4;
+  margin-bottom: 8px;
+  color: black;
+  font-weight: bold;
+  text-transform: none;
+}
 
+.mx-2 {
+  margin-left: 8px;
+  margin-right: 8px;
+  font-weight: bold;
+  color: black;
+}
 </style>

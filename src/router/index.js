@@ -11,12 +11,15 @@ import SupplierCode from "@/views/SupplierCode.vue";
 import ShipCode from "@/views/ShipCode.vue";
 import MakeInquiry from "@/views/MakeInquiry.vue";
 import EmailForm from "@/views/EmailForm.vue";
+import AuthSuccess from "@/views/AuthSuccess.vue";
+import Profile from "@/views/Profile.vue";
+import EstimateDetail from "@/views/EstimateDetail.vue";
 
 Vue.use(VueRouter)
 
 const routes = [
   {
-    path: "/",
+    path: "/dashboard",
     name: 'Dashboard',
     component: DashBoard
   },
@@ -65,6 +68,21 @@ const routes = [
     name: 'send-email',
     component: EmailForm
   },
+  {
+    path: "/auth/success", // 새로운 경로 추가
+    name: 'auth-success',
+    component: AuthSuccess
+  },
+  {
+    path: '/member/:memberId',
+    name: 'Profile',
+    component: Profile
+  },
+  {
+    path: '/estimateManagement/:estimateId',
+    name: 'EstimateDetail',
+    component: EstimateDetail
+  }
 ]
 
 const router = new VueRouter({
