@@ -75,6 +75,7 @@
               <th>U/PRICE</th>
               <th>AMOUNT</th>
               <th>NOTES</th>
+              <th>ACTIONS</th>
             </tr>
             </thead>
             <tbody>
@@ -87,6 +88,11 @@
               <td><v-text-field v-model="item.uprice" type="number" dense></v-text-field></td>
               <td><v-text-field v-model="item.amount" type="number" dense></v-text-field></td>
               <td><v-textarea v-model="item.notes" rows="1" dense></v-textarea></td>
+              <td>
+                <v-btn icon @click="removeItem(index)">
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </td>
             </tr>
             </tbody>
           </template>
@@ -155,6 +161,9 @@ export default {
     },
     addItem() {
       this.items.push({code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''});
+    },
+    removeItem(index) {
+      this.items.splice(index, 1);
     },
     handleFileUpload() {
       const reader = new FileReader();
