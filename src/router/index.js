@@ -79,10 +79,10 @@ const routes = [
     component: Profile
   },
   {
-    path: '/estimateManagement/:estimateId',
-    name: 'estimate-detail',
+    path: '/estimates/:estimateId',
+    name: 'EstimateDetail',
     component: EstimateDetail
-  }
+  },
 ]
 
 const router = new VueRouter({

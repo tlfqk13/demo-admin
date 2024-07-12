@@ -125,7 +125,7 @@ export default {
   },
   methods: {
     fetchEstimateDetail() {
-      axios.get(`http://localhost:8888/api/customer-inquiries/${this.$route.params.id}`)
+      axios.get(`http://localhost:8888/api/customer-inquiries/${this.$route.params.estimateId}`)
         .then(response => {
           this.estimate = response.data;
         })

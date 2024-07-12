@@ -101,6 +101,11 @@
         <v-btn type="submit" color="primary" class="mt-4">Generate and Send</v-btn>
       </v-form>
 
+      <v-snackbar v-model="snackbar" :timeout="3000" top>
+        {{ snackbarMessage }}
+        <v-btn color="red" text @click="snackbar = false">Close</v-btn>
+      </v-snackbar>
+
       <div class="preview" v-html="generateHtmlTemplate(lineHeightNormal)"></div>
 
       <!-- EmailForm 컴포넌트를 하단에 추가 -->
@@ -140,7 +145,9 @@ export default {
       ],
       lineHeightNormal: 1.2,
       lineHeightCompact: 0.3,
-      file: null
+      file: null,
+      snackbar: false,
+      snackbarMessage: ''
     };
   },
   methods: {
@@ -394,8 +401,12 @@ export default {
 
         const response = await axios.post('http://127.0.0.1:8888/api/customer-inquiries', customerInquiry);
         console.log('Customer Inquiry Response:', response.data);
+        this.snackbarMessage = '생성되었습니다';
+        this.snackbar = true;
       } catch (error) {
         console.error('Error sending request:', error);
+        this.snackbarMessage = '생성에 실패했습니다';
+        this.snackbar = true;
       }
     }
   }

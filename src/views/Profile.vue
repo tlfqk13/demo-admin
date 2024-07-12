@@ -5,7 +5,7 @@
         <v-card>
           <v-tabs v-model="tab">
             <v-tab>Account</v-tab>
-            <v-tab>Info</v-tab>
+            <v-tab>Mail Template</v-tab>
           </v-tabs>
           <v-tabs-items v-model="tab">
             <v-tab-item>
@@ -94,53 +94,55 @@
               <v-card flat>
                 <v-card-title>Mail Template Settings</v-card-title>
                 <v-card-text>
-                  <v-row>
-                    <v-col cols="12" md="4">
-                      <v-card class="pa-3">
-                        <v-card-title class="title">
-                          <v-icon class="mr-2">mdi-format-title</v-icon>
-                          Mail Title
-                        </v-card-title>
-                        <v-card-text>
-                          <v-text-field
-                            v-model="mailTemplate.mainTitle"
-                            label="Mail Title"
-                          ></v-text-field>
-                        </v-card-text>
-                      </v-card>
-                    </v-col>
-                    <v-col cols="12" md="4">
-                      <v-card class="pa-3">
-                        <v-card-title class="header">
-                          <v-icon class="mr-2">mdi-format-header-1</v-icon>
-                          Mail Header
-                        </v-card-title>
-                        <v-card-text>
-                          <v-textarea
-                            v-model="mailTemplate.mailHeader"
-                            label="Mail Header"
-                            rows="5"
-                          ></v-textarea>
-                        </v-card-text>
-                      </v-card>
-                    </v-col>
-                    <v-col cols="12" md="4">
-                      <v-card class="pa-3">
-                        <v-card-title class="body">
-                          <v-icon class="mr-2">mdi-format-text"
-                            ></v-icon>
-                          Mail Body
-                        </v-card-title>
-                        <v-card-text>
-                          <v-textarea
-                            v-model="mailTemplate.mailBody"
-                            label="Mail Body"
-                            rows="5"
-                          ></v-textarea>
-                        </v-card-text>
-                      </v-card>
-                    </v-col>
-                  </v-row>
+                  <v-form @submit.prevent="saveMailTemplate">
+                    <v-row>
+                      <v-col cols="12" md="4">
+                        <v-card class="pa-3">
+                          <v-card-title class="title">
+                            <v-icon class="mr-2">mdi-format-title</v-icon>
+                            Mail Title
+                          </v-card-title>
+                          <v-card-text>
+                            <v-text-field
+                              v-model="mailTemplate.mainTitle"
+                              label="Mail Title"
+                            ></v-text-field>
+                          </v-card-text>
+                        </v-card>
+                      </v-col>
+                      <v-col cols="12" md="4">
+                        <v-card class="pa-3">
+                          <v-card-title class="header">
+                            <v-icon class="mr-2">mdi-format-header-1</v-icon>
+                            Mail Header
+                          </v-card-title>
+                          <v-card-text>
+                            <v-textarea
+                              v-model="mailTemplate.mailHeader"
+                              label="Mail Header"
+                              rows="5"
+                            ></v-textarea>
+                          </v-card-text>
+                        </v-card>
+                      </v-col>
+                      <v-col cols="12" md="4">
+                        <v-card class="pa-3">
+                          <v-card-title class="body">
+                            <v-icon class="mr-2">mdi-format-text</v-icon>
+                            Mail Body
+                          </v-card-title>
+                          <v-card-text>
+                            <v-textarea
+                              v-model="mailTemplate.mailBody"
+                              label="Mail Body"
+                              rows="5"
+                            ></v-textarea>
+                          </v-card-text>
+                        </v-card>
+                      </v-col>
+                    </v-row>
+                    <v-btn type="submit" color="primary">Save Template</v-btn>
+                  </v-form>
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -224,6 +226,22 @@ export default {
     },
     saveChanges() {
       // Logic to save user changes
+    },
+    saveMailTemplate() {
+      const mailTemplateData = {
+        mailTitle: this.mailTemplate.mainTitle,
+        mailHeader: this.mailTemplate.mailHeader,
+        mailBody: this.mailTemplate.mailBody
+      };
+      axios.post('http://localhost:8888/api/member/mail-template', mailTemplateData)
+        .then(() => {
+          console.log('Mail Template Saved Successfully');
+          alert('Mail Template Saved Successfully');
+        })
+        .catch(error => {
+          console.error('There was an error saving the mail template!', error);
+          alert('There was an error saving the mail template');
+        });
     },
     cancel() {
       // Logic to cancel changes and reset the form

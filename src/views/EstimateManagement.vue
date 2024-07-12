@@ -142,14 +142,14 @@ export default {
       customerName: '',
       productName: '',
       headers: [
-        {text: '문서번호', value: 'documentNumber', width: '200px'},
-        {text: '작성일자', value: 'date', width: '120px'},
-        {text: '매출처명', value: 'customerName', width: '150px'},
-        {text: '선명', value: 'productName', width: '120px'},
-        {text: 'REF NO', value: 'refNumber', width: '200px'},
-        {text: '메이커', value: 'maker', width: '120px'},
-        {text: '유형', value: 'type', width: '120px'},
-        {text: 'PDF', value: 'pdfUrl', width: '200px'},
+        { text: '문서번호', value: 'documentNumber', width: '200px' },
+        { text: '작성일자', value: 'date', width: '120px' },
+        { text: '매출처명', value: 'customerName', width: '150px' },
+        { text: '선명', value: 'productName', width: '120px' },
+        { text: 'REF NO', value: 'refNumber', width: '200px' },
+        { text: '메이커', value: 'maker', width: '120px' },
+        { text: '유형', value: 'type', width: '120px' },
+        { text: 'PDF', value: 'pdfUrl', width: '200px' },
       ],
       items: [],
     };
@@ -159,17 +159,20 @@ export default {
   },
   methods: {
     fetchData() {
-      axios.post('http://localhost:8888/api/customer-inquiries/search', {
-        memberId: this.memberId, // 사용자 ID를 함께 전달
-        startDate: this.startDate,
-        endDate: this.endDate,
-        documentNumber: this.documentNumber,
-        refNumber: this.refNumber,
-        customerName: this.customerName,
-        productName: this.productName,
+      axios.get('http://localhost:8888/api/customer-inquiries', {
+        params: {
+          memberId: this.memberId,
+          startDate: this.startDate,
+          endDate: this.endDate,
+          documentNumber: this.documentNumber,
+          refNumber: this.refNumber,
+          customerName: this.customerName,
+          productName: this.productName,
+        }
       })
         .then(response => {
-          this.items = response.data.inquiries.map(inquiry => ({
+          const inquiries = response.data.customerInquiryResponseList;
+          this.items = inquiries.map(inquiry => ({
             id: inquiry.id,
             documentNumber: inquiry.refNumber,
             date: inquiry.date,
@@ -186,13 +189,13 @@ export default {
         });
     },
     search() {
-      this.fetchData(); // 검색과 초기 로드를 동일한 메서드로 처리
+      this.fetchData();
     },
     refresh() {
       this.fetchData();
     },
     goToDetail(item) {
-      this.$router.push({name: 'EstimateDetail', params: {id: item.id}});
+      this.$router.push({name: 'EstimateDetail', params: {estimateId: item.id}});
     }
   },
 };
