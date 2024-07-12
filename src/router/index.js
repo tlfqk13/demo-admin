@@ -74,13 +74,13 @@ const routes = [
     component: AuthSuccess
   },
   {
-    path: '/member/:memberId',
-    name: 'Profile',
+    path: '/profile',
+    name: 'profile',
     component: Profile
   },
   {
     path: '/estimateManagement/:estimateId',
-    name: 'EstimateDetail',
+    name: 'estimate-detail',
     component: EstimateDetail
   }
 ]
