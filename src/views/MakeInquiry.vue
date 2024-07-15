@@ -18,12 +18,19 @@
                   xls template to quote your prices easily
                 </v-card-text>
                 <v-card-actions>
-                  <v-file-input
-                    v-model="file"
-                    label="Upload Excel File"
-                    @change="handleFileUpload"
-                    accept=".xlsx, .xls"
-                  ></v-file-input>
+                  <div
+                    class="drop-zone"
+                    @dragover.prevent
+                    @dragenter.prevent
+                    @drop.prevent="handleDropExcel"
+                  >
+                    <v-file-input
+                      v-model="file"
+                      label="Upload Excel File"
+                      @change="handleFileUpload"
+                      accept=".xlsx, .xls"
+                    ></v-file-input>
+                  </div>
                 </v-card-actions>
               </v-card>
             </v-col>
@@ -97,18 +104,26 @@
             </tbody>
           </template>
         </v-simple-table>
-        <v-btn type="submit" color="primary" class="mt-4 mb-4">Generate and Send</v-btn> <!-- 여백 추가 -->
-        <v-expansion-panels>
-          <v-expansion-panel>
-            <v-expansion-panel-header>
-              <b>견적 의뢰서 미리보기</b>
-            </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <div class="preview" v-html="generateHtmlTemplate(lineHeightNormal)"></div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
+
+        <v-btn type="submit" color="primary" class="mt-4 mb-4">Generate</v-btn>
       </v-form>
+
+      <v-expansion-panels v-model="previewPanel" multiple>
+        <v-expansion-panel>
+          <v-expansion-panel-header>
+            <b>견적 의뢰서 미리보기</b>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <div class="preview" v-html="generateHtmlTemplate(lineHeightNormal)"></div>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+
+      <v-snackbar v-model="snackbar" :timeout="3000" top>
+        {{ snackbarMessage }}
+        <v-btn color="red" text @click="snackbar = false">Close</v-btn>
+      </v-snackbar>
+
       <!-- EmailForm 컴포넌트를 하단에 추가 -->
       <email-form ref="emailForm" class="mt-4"></email-form>
     </v-container>
@@ -146,6 +161,7 @@ export default {
       lineHeightNormal: 1.2,
       lineHeightCompact: 0.3,
       file: null,
+      previewPanel: [0], // 기본으로 열려있는 상태
       snackbar: false,
       snackbarMessage: ''
     };
@@ -193,6 +209,11 @@ export default {
         }));
       };
       reader.readAsArrayBuffer(this.file);
+    },
+    handleDropExcel(event) {
+      const files = event.dataTransfer.files;
+      this.file = files[0];
+      this.handleFileUpload();
     },
     generateHtmlTemplate(lineHeight) {
       const headerLines = this.headerMessage.split('\n').map(line => `<div>${line}</div>`).join('');
@@ -433,5 +454,14 @@ export default {
   padding: 16px;
   margin-top: 32px;
   background-color: #f9f9f9;
+}
+
+.drop-zone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 16px;
+  width: 100%; /* 추가 */
 }
 </style>
