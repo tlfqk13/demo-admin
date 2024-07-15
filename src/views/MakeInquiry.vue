@@ -48,7 +48,7 @@
             <v-text-field v-model="vesselName" label="Vessel Name"></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model="refNumber" label="Reference Number" :readonly="true"></v-text-field>
+            <v-text-field v-model="refNumber" label="Reference Number" :readonly="false"></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
             <v-text-field v-model="date" label="Date" type="date"></v-text-field>
@@ -109,7 +109,7 @@
       <div class="preview" v-html="generateHtmlTemplate(lineHeightNormal)"></div>
 
       <!-- EmailForm 컴포넌트를 하단에 추가 -->
-      <email-form class="mt-4"></email-form>
+      <email-form ref="emailForm" class="mt-4"></email-form>
 
     </v-container>
   </v-app>
@@ -401,6 +401,9 @@ export default {
 
         const response = await axios.post('http://127.0.0.1:8888/api/customer-inquiries', customerInquiry);
         console.log('Customer Inquiry Response:', response.data);
+
+        // Update the email form attachments
+        this.$refs.emailForm.addAttachment(pdfUrl);
         this.snackbarMessage = '생성되었습니다';
         this.snackbar = true;
       } catch (error) {

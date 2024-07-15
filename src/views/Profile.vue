@@ -90,59 +90,45 @@
                 </v-card-text>
               </v-card>
             </v-tab-item>
+
+            <!-- Mail Template Settings Tab -->
             <v-tab-item>
               <v-card flat>
                 <v-card-title>Mail Template Settings</v-card-title>
                 <v-card-text>
-                  <v-form @submit.prevent="saveMailTemplate">
-                    <v-row>
-                      <v-col cols="12" md="4">
-                        <v-card class="pa-3">
-                          <v-card-title class="title">
-                            <v-icon class="mr-2">mdi-format-title</v-icon>
-                            Mail Title
-                          </v-card-title>
-                          <v-card-text>
-                            <v-text-field
-                              v-model="mailTemplate.mainTitle"
-                              label="Mail Title"
-                            ></v-text-field>
-                          </v-card-text>
-                        </v-card>
-                      </v-col>
-                      <v-col cols="12" md="4">
-                        <v-card class="pa-3">
-                          <v-card-title class="header">
-                            <v-icon class="mr-2">mdi-format-header-1</v-icon>
-                            Mail Header
-                          </v-card-title>
-                          <v-card-text>
-                            <v-textarea
-                              v-model="mailTemplate.mailHeader"
-                              label="Mail Header"
-                              rows="5"
-                            ></v-textarea>
-                          </v-card-text>
-                        </v-card>
-                      </v-col>
-                      <v-col cols="12" md="4">
-                        <v-card class="pa-3">
-                          <v-card-title class="body">
-                            <v-icon class="mr-2">mdi-format-text</v-icon>
-                            Mail Body
-                          </v-card-title>
-                          <v-card-text>
-                            <v-textarea
-                              v-model="mailTemplate.mailBody"
-                              label="Mail Body"
-                              rows="5"
-                            ></v-textarea>
-                          </v-card-text>
-                        </v-card>
-                      </v-col>
-                    </v-row>
-                    <v-btn type="submit" color="primary">Save Template</v-btn>
-                  </v-form>
+                  <v-row>
+                    <v-col cols="12">
+                      <v-btn color="primary" @click="showTemplateForm">새 템플릿 추가</v-btn>
+                      <v-list two-line>
+                        <v-list-item v-for="(template, index) in mailTemplates" :key="index" @click="editTemplate(template)">
+                          <v-list-item-content>
+                            <v-list-item-title>{{ template.mailTitle }}</v-list-item-title>
+                            <v-list-item-subtitle>{{ template.mailHeader }}</v-list-item-subtitle>
+                          </v-list-item-content>
+                        </v-list-item>
+                      </v-list>
+                    </v-col>
+                  </v-row>
+
+                  <v-dialog v-model="dialog" max-width="600px">
+                    <v-card>
+                      <v-card-title>
+                        <span class="headline">{{ dialogTitle }}</span>
+                      </v-card-title>
+                      <v-card-text>
+                        <v-form ref="form" v-model="valid" lazy-validation>
+                          <v-text-field v-model="currentTemplate.mailTitle" label="Mail Title"></v-text-field>
+                          <v-textarea v-model="currentTemplate.mailHeader" label="Mail Header" rows="3"></v-textarea>
+                          <v-textarea v-model="currentTemplate.mailBody" label="Mail Body" rows="5"></v-textarea>
+                        </v-form>
+                      </v-card-text>
+                      <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
+                        <v-btn color="blue darken-1" text @click="saveTemplate">Save</v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -161,8 +147,10 @@ export default {
   data() {
     return {
       tab: 0,
+      dialog: false,
+      dialogTitle: '',
       valid: true,
-      profilePicture: '', // 기본 이미지 경로 제거
+      profilePicture: '',
       user: {
         givenName: '',
         familyName: '',
@@ -172,8 +160,14 @@ export default {
         company: '',
         emailConfirmed: false,
       },
-      mailTemplate: {
-        mainTitle: '',
+      mailTemplates: [
+        { id: 1, mailTitle: 'Template 1', mailHeader: 'Header 1', mailBody: 'Body 1' },
+        { id: 2, mailTitle: 'Template 2', mailHeader: 'Header 2', mailBody: 'Body 2' },
+        { id: 3, mailTitle: 'Template 3', mailHeader: 'Header 3', mailBody: 'Body 3' }
+      ],
+      currentTemplate: {
+        id: null,
+        mailTitle: '',
         mailHeader: '',
         mailBody: '',
       },
@@ -186,26 +180,33 @@ export default {
   },
   mounted() {
     this.fetchUserData();
+    this.fetchMailTemplates();
   },
   methods: {
     fetchUserData() {
       axios.get(`http://localhost:8888/api/member-info`)
         .then(response => {
-          const { member, mailTemplate } = response.data;
+          const { member } = response.data;
           this.user.givenName = member.givenName;
           this.user.familyName = member.familyName;
           this.user.email = member.email;
           this.user.country = member.country;
-          this.user.status = 'Active'; // 상태 필드가 백엔드에 없으면 기본 값으로 설정
-          this.user.company = 'Your Company'; // 회사 필드가 백엔드에 없으면 기본 값으로 설정
-          this.user.emailConfirmed = true; // 이메일 확인 필드가 백엔드에 없으면 기본 값으로 설정
-          this.mailTemplate.mainTitle = mailTemplate.mainTitle;
-          this.mailTemplate.mailHeader = mailTemplate.mailHeader;
-          this.mailTemplate.mailBody = mailTemplate.mailBody;
-          this.profilePicture = ''; // 기본 이미지가 없으면 빈 문자열
+          this.user.status = 'Active';
+          this.user.company = 'Your Company';
+          this.user.emailConfirmed = true;
+          this.profilePicture = '';
         })
         .catch(error => {
           console.error('There was an error fetching the user data!', error);
+        });
+    },
+    fetchMailTemplates() {
+      axios.get(`http://localhost:8888/api/member/mail-templates`)
+        .then(response => {
+          this.mailTemplates = response.data;
+        })
+        .catch(error => {
+          console.error('There was an error fetching the mail templates!', error);
         });
     },
     onFileChange(event) {
@@ -219,7 +220,7 @@ export default {
       }
     },
     resetPhoto() {
-      this.profilePicture = ''; // 기본 이미지로 리셋하지 않음
+      this.profilePicture = '';
     },
     resendConfirmation() {
       // Logic to resend email confirmation
@@ -227,24 +228,42 @@ export default {
     saveChanges() {
       // Logic to save user changes
     },
-    saveMailTemplate() {
-      const mailTemplateData = {
-        mailTitle: this.mailTemplate.mainTitle,
-        mailHeader: this.mailTemplate.mailHeader,
-        mailBody: this.mailTemplate.mailBody
-      };
-      axios.post('http://localhost:8888/api/member/mail-template', mailTemplateData)
-        .then(() => {
-          console.log('Mail Template Saved Successfully');
-          alert('Mail Template Saved Successfully');
-        })
-        .catch(error => {
-          console.error('There was an error saving the mail template!', error);
-          alert('There was an error saving the mail template');
-        });
-    },
     cancel() {
       // Logic to cancel changes and reset the form
+    },
+    showTemplateForm() {
+      this.dialogTitle = '새 템플릿 추가';
+      this.currentTemplate = { id: null, mailTitle: '', mailHeader: '', mailBody: '' };
+      this.dialog = true;
+    },
+    editTemplate(template) {
+      this.dialogTitle = '템플릿 수정';
+      this.currentTemplate = { ...template };
+      this.dialog = true;
+    },
+    closeDialog() {
+      this.dialog = false;
+    },
+    saveTemplate() {
+      if (this.currentTemplate.id) {
+        axios.put(`http://localhost:8888/api/member/mail-template/${this.currentTemplate.id}`, this.currentTemplate)
+          .then(() => {
+            this.fetchMailTemplates();
+            this.closeDialog();
+          })
+          .catch(error => {
+            console.error('There was an error updating the template!', error);
+          });
+      } else {
+        axios.post('http://localhost:8888/api/member/mail-template', this.currentTemplate)
+          .then(() => {
+            this.fetchMailTemplates();
+            this.closeDialog();
+          })
+          .catch(error => {
+            console.error('There was an error creating the template!', error);
+          });
+      }
     },
   },
 };

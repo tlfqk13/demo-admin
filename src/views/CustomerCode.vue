@@ -12,7 +12,7 @@
               :headers="headers"
               :items="filteredCustomers"
               class="elevation-1 rounded-table-content"
-              item-key="code"
+              item-key="id"
               dense
               @click:row="selectCustomer"
               :items-per-page="15"
@@ -49,16 +49,17 @@
             <v-form>
               <v-text-field label="코드" v-model="selectedCustomer.code"></v-text-field>
               <v-text-field label="사업자명" v-model="selectedCustomer.businessName"></v-text-field>
-              <v-text-field label="연락처" v-model="selectedCustomer.phone"></v-text-field>
-              <v-text-field label="담당자" v-model="selectedCustomer.contactPerson"></v-text-field>
+              <v-text-field label="연락처" v-model="selectedCustomer.contact"></v-text-field>
+              <v-text-field label="담당자" v-model="selectedCustomer.representative"></v-text-field>
               <v-text-field label="E-MAIL" v-model="selectedCustomer.email"></v-text-field>
               <v-text-field label="주소" v-model="selectedCustomer.address"></v-text-field>
-              <v-text-field label="기타정보" v-model="selectedCustomer.extraInfo"></v-text-field>
+              <v-text-field label="국가" v-model="selectedCustomer.country"></v-text-field>
             </v-form>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="primary" @click="saveCustomer">저장</v-btn>
+            <v-btn color="secondary" @click="resetForm">초기화</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -67,6 +68,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'CustomerCode',
   data() {
@@ -75,44 +78,22 @@ export default {
       headers: [
         { text: '코드', value: 'code', width: '100px' },
         { text: '사업자명', value: 'businessName', width: '200px' },
-        { text: '연락처', value: 'phone', width: '200px' },
-        { text: '담당자', value: 'contactPerson', width: '150px' },
+        { text: '연락처', value: 'contact', width: '200px' },
+        { text: '담당자', value: 'representative', width: '150px' },
         { text: 'E-MAIL', value: 'email', width: '200px' },
         { text: '주소', value: 'address', width: '300px' },
-        { text: '기타정보', value: 'extraInfo', width: '200px' },
+        { text: '국가', value: 'country', width: '200px' },
       ],
-      customers: [
-        {
-          code: 'AR',
-          businessName: 'ARYA TANKERS PVT LTD',
-          contactPerson: 'Mr. Yogesh',
-          phone: '+91 22 49229009',
-          email: 'yogesh.shinde@arya.in',
-          address: 'Marathon Futurex, B-501, Mafatlal Mills, N.M. Joshi Marg, Lower Parel, Mumbai',
-          supplierCode: 'SUP123',
-          contact: '+91 22 49229009',
-          extraInfo: '추가 정보 예시'
-        },
-        ...Array.from({ length: 29 }, (_, i) => ({
-          code: `CUST${i + 1}`,
-          businessName: `Business ${i + 1}`,
-          contactPerson: `Contact ${i + 1}`,
-          phone: `+91 22 4000000${i + 1}`,
-          email: `email${i + 1}@business.com`,
-          address: `Address ${i + 1}`,
-          supplierCode: `SUP${i + 1}`,
-          contact: `+91 22 4000000${i + 1}`,
-          extraInfo: `Extra info ${i + 1}`
-        }))
-      ],
+      customers: [],
       selectedCustomer: {
+        id: null,
         code: '',
         businessName: '',
-        phone: '',
-        contactPerson: '',
+        contact: '',
+        representative: '',
         email: '',
         address: '',
-        extraInfo: '',
+        country: '',
       }
     };
   },
@@ -126,28 +107,102 @@ export default {
       );
     }
   },
+  mounted() {
+    this.fetchCustomers();
+  },
   methods: {
+    fetchCustomers() {
+      axios.get('http://localhost:8888/api/customers')
+        .then(response => {
+          this.customers = response.data.customers;
+        })
+        .catch(error => {
+          console.error('There was an error fetching the customers!', error);
+        });
+    },
     selectCustomer(customer) {
       this.selectedCustomer = { ...customer };
     },
     saveCustomer() {
-      const index = this.customers.findIndex(c => c.code === this.selectedCustomer.code);
-      if (index > -1) {
-        this.customers.splice(index, 1, this.selectedCustomer);
+      if (this.selectedCustomer.id) {
+        // Update existing customer
+        axios.put(`http://localhost:8888/api/customers/${this.selectedCustomer.id}`, this.selectedCustomer)
+          .then(response => {
+            const index = this.customers.findIndex(c => c.id === this.selectedCustomer.id);
+            if (index > -1) {
+              this.customers.splice(index, 1, response.data.customer);
+            }
+            alert('Customer updated successfully.');
+          })
+          .catch(error => {
+            console.error('There was an error updating the customer!', error);
+          });
       } else {
-        this.customers.push(this.selectedCustomer);
+        // Add new customer
+        axios.post('http://localhost:8888/api/customers', this.selectedCustomer)
+          .then(response => {
+            this.customers.push(response.data.customer);
+            alert('Customer added successfully.');
+          })
+          .catch(error => {
+            console.error('There was an error adding the customer!', error);
+          });
       }
-      this.$emit('update:customer-list', this.customers);
+      this.resetForm();
     },
-    closeDialog() {
-      this.$emit('close');
-    },
-  },
+    resetForm() {
+      this.selectedCustomer = {
+        id: null,
+        code: '',
+        businessName: '',
+        contact: '',
+        representative: '',
+        email: '',
+        address: '',
+        country: '',
+      };
+    }
+  }
 };
 </script>
 
 <style scoped>
 .rounded-table-content {
   border-radius: 16px !important;
+}
+
+.v-card-title {
+  background-color: #f5f5f5;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.v-card-text {
+  padding-bottom: 20px;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+.v-data-table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.v-data-table td {
+  white-space: nowrap;
+}
+
+.v-data-table tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.v-toolbar-title {
+  font-weight: bold;
+}
+
+.v-btn {
+  margin-top: 16px;
 }
 </style>

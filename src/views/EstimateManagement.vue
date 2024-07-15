@@ -108,15 +108,6 @@
                     </v-btn>
                   </v-toolbar>
                 </template>
-                <template v-slot:[`item.estimate`]="{ item }">
-                  <v-checkbox v-model="item.estimate" disabled></v-checkbox>
-                </template>
-                <template v-slot:[`item.invoice`]="{ item }">
-                  <v-checkbox v-model="item.invoice" disabled></v-checkbox>
-                </template>
-                <template v-slot:[`item.order`]="{ item }">
-                  <v-checkbox v-model="item.order" disabled></v-checkbox>
-                </template>
               </v-data-table>
             </div>
           </v-card-text>
@@ -159,16 +150,13 @@ export default {
   },
   methods: {
     fetchData() {
-      axios.get('http://localhost:8888/api/customer-inquiries', {
-        params: {
-          memberId: this.memberId,
-          startDate: this.startDate,
-          endDate: this.endDate,
-          documentNumber: this.documentNumber,
-          refNumber: this.refNumber,
-          customerName: this.customerName,
-          productName: this.productName,
-        }
+      axios.post('http://localhost:8888/api/customer-inquiries/search', {
+        startDate: this.startDate,
+        endDate: this.endDate,
+        documentNumber: this.documentNumber,
+        refNumber: this.refNumber,
+        customerName: this.customerName,
+        productName: this.productName,
       })
         .then(response => {
           const inquiries = response.data.customerInquiryResponseList;
@@ -195,7 +183,7 @@ export default {
       this.fetchData();
     },
     goToDetail(item) {
-      this.$router.push({name: 'EstimateDetail', params: {estimateId: item.id}});
+      this.$router.push({ name: 'EstimateDetail', params: { estimateId: item.id } });
     }
   },
 };

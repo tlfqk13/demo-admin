@@ -1,60 +1,39 @@
 <template>
-  <v-app>
-    <v-container>
-      <v-card class="pa-3 mb-4">
-        <v-card-title class="section-title">
-          <v-icon class="mr-2">mdi-email</v-icon>
-          Send Email with PDF Attachments
-        </v-card-title>
-        <v-card-text>
-          <v-form @submit.prevent="sendEmail">
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-text-field v-model="toEmail" label="To Email" required></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field v-model="subject" label="Subject" required></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6">
-                <strong>Message from buyer:</strong>
-                <v-textarea
-                  v-model="headerMessage"
-                  rows="6"
-                  outlined
-                  class="mt-2"
-                ></v-textarea>
-              </v-col>
-              <v-col cols="12" md="6">
-                <strong>Attachments:</strong>
-                <v-list>
-                  <v-list-item v-for="(file, index) in pdfFiles" :key="index">
-                    <v-list-item-content>
-                      <v-list-item-title>
-                        <v-icon small class="mr-1">mdi-attachment</v-icon>
-                        <span>{{ file.name }}</span>
-                      </v-list-item-title>
-                    </v-list-item-content>
-                  </v-list-item>
-                </v-list>
-              </v-col>
-              <v-col cols="12">
-                <v-file-input
-                  v-model="pdfFiles"
-                  label="Attach PDFs"
-                  accept=".pdf"
-                  multiple
-                  @change="updateAttachments"
-                ></v-file-input>
-              </v-col>
-              <v-col cols="12">
-                <v-btn type="submit" color="primary">Send Email</v-btn>
-              </v-col>
-            </v-row>
-          </v-form>
-        </v-card-text>
-      </v-card>
-    </v-container>
-  </v-app>
+  <v-card class="pa-3">
+    <v-card-title class="section-title">
+      <v-icon class="mr-2">mdi-email-outline</v-icon>
+      Send Email with PDF Attachments
+    </v-card-title>
+    <v-card-text>
+      <v-form>
+        <v-text-field v-model="toEmail" label="To Email"></v-text-field>
+        <v-text-field v-model="subject" label="Subject"></v-text-field>
+        <v-textarea v-model="message" label="Message from buyer:" rows="3"></v-textarea>
+        <v-file-input
+          v-model="newAttachments"
+          label="Attach PDFs"
+          prepend-icon="mdi-paperclip"
+          multiple
+          show-size
+          chips
+          @change="handleFileInputChange"
+        ></v-file-input>
+        <v-list>
+          <v-list-item v-for="(attachment, index) in attachments" :key="index">
+            <v-list-item-content>{{ attachment.name || attachment }}</v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-form>
+    </v-card-text>
+    <v-card-actions>
+      <v-btn color="primary" @click="sendEmail">Send Email</v-btn>
+    </v-card-actions>
+
+    <v-snackbar v-model="snackbar" :timeout="3000" top>
+      {{ snackbarMessage }}
+      <v-btn color="red" text @click="snackbar = false">Close</v-btn>
+    </v-snackbar>
+  </v-card>
 </template>
 
 <script>
@@ -62,58 +41,75 @@ import axios from 'axios';
 
 export default {
   name: 'EmailForm',
+  props: {
+    initialAttachments: {
+      type: Array,
+      default: () => []
+    }
+  },
   data() {
     return {
       toEmail: '',
       subject: '',
       message: '',
-      pdfFiles: [], // 변경: 다중 파일을 위한 배열
-      headerMessage: 'Dear Sir,\n\nGood day!\n\nPlease quote for the attached requisition of the vessel "Winnie". vessel ETA is the 15th of Singapore.\n\nRegards,\nBharani'
+      newAttachments: [],
+      attachments: [],
+      snackbar: false,
+      snackbarMessage: '',
     };
   },
+  created() {
+    this.attachments = [...this.initialAttachments];
+  },
   methods: {
-    updateAttachments() {
-      if (this.pdfFiles.length > 0) {
-        this.attachmentNames = this.pdfFiles.map(file => file.name);
-      } else {
-        this.attachmentNames = [];
-      }
+    handleFileInputChange() {
+      this.attachments.push(...this.newAttachments);
+      this.newAttachments = [];
+    },
+    addAttachment(pdfUrl) {
+      this.attachments.push(pdfUrl);
     },
     async sendEmail() {
-      if (this.pdfFiles.length === 0) {
-        alert('Please attach at least one PDF file.');
-        return;
-      }
-
       const formData = new FormData();
       formData.append('toEmail', this.toEmail);
       formData.append('subject', this.subject);
       formData.append('message', this.message);
 
-      // 변경: 모든 파일을 FormData에 추가
-      this.pdfFiles.forEach(file => {
-        formData.append('pdfFiles', file);
+      // Append attachment URLs
+      this.attachments.forEach((file) => {
+        if (typeof file === 'string') {
+          formData.append('attachmentUrls', file); // Add URLs as strings
+        } else {
+          formData.append('attachments', file); // Add files as MultipartFile
+        }
       });
 
       try {
-        await axios.post('http://localhost:8888/api/send-email', formData, {
+        const response = await axios.post('http://127.0.0.1:8888/api/send-email', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-        alert('Email sent successfully!');
+
+        if (response.status === 200) {
+          this.snackbarMessage = '이메일이 성공적으로 발송되었습니다.';
+          this.snackbar = true;
+        } else {
+          throw new Error('Email send failed');
+        }
       } catch (error) {
         console.error('Error sending email:', error);
-        alert('Failed to send email.');
+        this.snackbarMessage = '이메일 발송에 실패했습니다.';
+        this.snackbar = true;
       }
     },
   },
 };
 </script>
 
-<style>
+<style scoped>
 .section-title {
-  background-color: #f5f5f5;
+  background-color: #00f18d;
   padding: 16px;
   border-radius: 8px;
   font-weight: bold;

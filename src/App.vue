@@ -22,7 +22,7 @@
       <v-list dense>
         <v-list-item>
           <v-list-item-avatar>
-            <v-img src="@/assets/logo.png"></v-img>
+            <v-img src="@/assets/baskorea_logo.png"></v-img>
           </v-list-item-avatar>
           <v-list-item-content>
             <v-list-item-title class="white--text">BAS KOREA</v-list-item-title>
