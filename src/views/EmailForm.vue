@@ -9,6 +9,12 @@
         <v-text-field v-model="toEmail" label="To Email"></v-text-field>
         <v-text-field v-model="subject" label="Subject"></v-text-field>
         <v-textarea v-model="message" label="Message from buyer:" rows="3"></v-textarea>
+
+        <!-- 드롭 영역 -->
+        <div class="drop-zone" @drop.prevent="handleFileDrop" @dragover.prevent>
+          Drop PDF files here or click to select
+        </div>
+
         <v-file-input
           v-model="newAttachments"
           label="Attach PDFs"
@@ -18,6 +24,7 @@
           chips
           @change="handleFileInputChange"
         ></v-file-input>
+
         <v-list>
           <v-list-item v-for="(attachment, index) in attachments" :key="index">
             <v-list-item-content>{{ attachment.name || attachment }}</v-list-item-content>
@@ -65,6 +72,16 @@ export default {
     handleFileInputChange() {
       this.attachments.push(...this.newAttachments);
       this.newAttachments = [];
+    },
+    handleFileDrop(event) {
+      event.preventDefault();
+      const files = event.dataTransfer.files;
+      this.addAttachments(Array.from(files));
+    },
+    addAttachments(files) {
+      files.forEach(file => {
+        this.attachments.push(file);
+      });
     },
     addAttachment(pdfUrl) {
       this.attachments.push(pdfUrl);
@@ -117,5 +134,13 @@ export default {
   text-align: center;
   margin-bottom: 16px;
   color: #333;
+}
+
+.drop-zone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 16px;
 }
 </style>

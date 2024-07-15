@@ -97,20 +97,20 @@
             </tbody>
           </template>
         </v-simple-table>
-
-        <v-btn type="submit" color="primary" class="mt-4">Generate and Send</v-btn>
+        <v-btn type="submit" color="primary" class="mt-4 mb-4">Generate and Send</v-btn> <!-- 여백 추가 -->
+        <v-expansion-panels>
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <b>견적 의뢰서 미리보기</b>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <div class="preview" v-html="generateHtmlTemplate(lineHeightNormal)"></div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
       </v-form>
-
-      <v-snackbar v-model="snackbar" :timeout="3000" top>
-        {{ snackbarMessage }}
-        <v-btn color="red" text @click="snackbar = false">Close</v-btn>
-      </v-snackbar>
-
-      <div class="preview" v-html="generateHtmlTemplate(lineHeightNormal)"></div>
-
       <!-- EmailForm 컴포넌트를 하단에 추가 -->
       <email-form ref="emailForm" class="mt-4"></email-form>
-
     </v-container>
   </v-app>
 </template>
