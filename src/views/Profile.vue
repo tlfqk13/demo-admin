@@ -93,44 +93,7 @@
 
             <!-- Mail Template Settings Tab -->
             <v-tab-item>
-              <v-card flat>
-                <v-card-title>Mail Template Settings</v-card-title>
-                <v-card-text>
-                  <v-row>
-                    <v-col cols="12">
-                      <v-btn color="primary" @click="showTemplateForm">새 템플릿 추가</v-btn>
-                      <v-list two-line>
-                        <v-list-item v-for="(template, index) in mailTemplates" :key="index" @click="editTemplate(template)">
-                          <v-list-item-content>
-                            <v-list-item-title>{{ template.mailTitle }}</v-list-item-title>
-                            <v-list-item-subtitle>{{ template.mailHeader }}</v-list-item-subtitle>
-                          </v-list-item-content>
-                        </v-list-item>
-                      </v-list>
-                    </v-col>
-                  </v-row>
-
-                  <v-dialog v-model="dialog" max-width="600px">
-                    <v-card>
-                      <v-card-title>
-                        <span class="headline">{{ dialogTitle }}</span>
-                      </v-card-title>
-                      <v-card-text>
-                        <v-form ref="form" v-model="valid" lazy-validation>
-                          <v-text-field v-model="currentTemplate.mailTitle" label="Mail Title"></v-text-field>
-                          <v-textarea v-model="currentTemplate.mailHeader" label="Mail Header" rows="3"></v-textarea>
-                          <v-textarea v-model="currentTemplate.mailBody" label="Mail Body" rows="5"></v-textarea>
-                        </v-form>
-                      </v-card-text>
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-                        <v-btn color="blue darken-1" text @click="saveTemplate">Save</v-btn>
-                      </v-card-actions>
-                    </v-card>
-                  </v-dialog>
-                </v-card-text>
-              </v-card>
+              <MailTemplate />
             </v-tab-item>
           </v-tabs-items>
         </v-card>
@@ -141,14 +104,16 @@
 
 <script>
 import axios from 'axios';
+import MailTemplate from './MailTemplate.vue';
 
 export default {
   name: 'UserProfile',
+  components: {
+    MailTemplate,
+  },
   data() {
     return {
       tab: 0,
-      dialog: false,
-      dialogTitle: '',
       valid: true,
       profilePicture: '',
       user: {
@@ -160,17 +125,6 @@ export default {
         company: '',
         emailConfirmed: false,
       },
-      mailTemplates: [
-        { id: 1, mailTitle: 'Template 1', mailHeader: 'Header 1', mailBody: 'Body 1' },
-        { id: 2, mailTitle: 'Template 2', mailHeader: 'Header 2', mailBody: 'Body 2' },
-        { id: 3, mailTitle: 'Template 3', mailHeader: 'Header 3', mailBody: 'Body 3' }
-      ],
-      currentTemplate: {
-        id: null,
-        mailTitle: '',
-        mailHeader: '',
-        mailBody: '',
-      },
       statuses: ['Active', 'Inactive'],
       rules: {
         required: (value) => !!value || 'Required.',
@@ -180,7 +134,6 @@ export default {
   },
   mounted() {
     this.fetchUserData();
-    this.fetchMailTemplates();
   },
   methods: {
     fetchUserData() {
@@ -198,15 +151,6 @@ export default {
         })
         .catch(error => {
           console.error('There was an error fetching the user data!', error);
-        });
-    },
-    fetchMailTemplates() {
-      axios.get(`http://localhost:8888/api/member/mail-templates`)
-        .then(response => {
-          this.mailTemplates = response.data;
-        })
-        .catch(error => {
-          console.error('There was an error fetching the mail templates!', error);
         });
     },
     onFileChange(event) {
@@ -230,40 +174,6 @@ export default {
     },
     cancel() {
       // Logic to cancel changes and reset the form
-    },
-    showTemplateForm() {
-      this.dialogTitle = '새 템플릿 추가';
-      this.currentTemplate = { id: null, mailTitle: '', mailHeader: '', mailBody: '' };
-      this.dialog = true;
-    },
-    editTemplate(template) {
-      this.dialogTitle = '템플릿 수정';
-      this.currentTemplate = { ...template };
-      this.dialog = true;
-    },
-    closeDialog() {
-      this.dialog = false;
-    },
-    saveTemplate() {
-      if (this.currentTemplate.id) {
-        axios.put(`http://localhost:8888/api/member/mail-template/${this.currentTemplate.id}`, this.currentTemplate)
-          .then(() => {
-            this.fetchMailTemplates();
-            this.closeDialog();
-          })
-          .catch(error => {
-            console.error('There was an error updating the template!', error);
-          });
-      } else {
-        axios.post('http://localhost:8888/api/member/mail-template', this.currentTemplate)
-          .then(() => {
-            this.fetchMailTemplates();
-            this.closeDialog();
-          })
-          .catch(error => {
-            console.error('There was an error creating the template!', error);
-          });
-      }
     },
   },
 };
