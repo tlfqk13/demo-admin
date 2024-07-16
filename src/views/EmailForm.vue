@@ -86,6 +86,10 @@ export default {
     addAttachment(pdfUrl) {
       this.attachments.push(pdfUrl);
     },
+    setTemplateData(subject, message) {
+      this.subject = subject;
+      this.message = message;
+    },
     async sendEmail() {
       const formData = new FormData();
       formData.append('toEmail', this.toEmail);

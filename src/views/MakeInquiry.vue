@@ -18,6 +18,14 @@
                   xls template to quote your prices easily
                 </v-card-text>
                 <v-card-actions>
+                  <div
+                    class="drop-zone"
+                    @dragover.prevent
+                    @dragenter.prevent
+                    @drop.prevent="handleDropExcel"
+                  >
+                    Drop Excel files here or click to select
+                  </div>
                   <v-file-input
                     v-model="file"
                     label="Upload Excel File"
@@ -102,15 +110,10 @@
           </template>
         </v-simple-table>
 
-        <v-btn type="submit" color="primary" class="mt-4">Generate and Send</v-btn>
+        <v-btn type="submit" color="primary" class="mt-4 mb-4">Generate</v-btn>
       </v-form>
 
-      <v-snackbar v-model="snackbar" :timeout="3000" top>
-        {{ snackbarMessage }}
-        <v-btn color="red" text @click="snackbar = false">Close</v-btn>
-      </v-snackbar>
-
-      <v-expansion-panels>
+      <v-expansion-panels v-model="previewPanel" multiple>
         <v-expansion-panel>
           <v-expansion-panel-header>
             <b>견적 의뢰서 미리보기</b>
@@ -121,9 +124,13 @@
         </v-expansion-panel>
       </v-expansion-panels>
 
-      <!-- EmailForm 컴포넌트를 하단에 추가 -->
-      <email-form class="mt-4"></email-form>
+      <v-snackbar v-model="snackbar" :timeout="3000" top>
+        {{ snackbarMessage }}
+        <v-btn color="red" text @click="snackbar = false">Close</v-btn>
+      </v-snackbar>
 
+      <!-- EmailForm 컴포넌트를 하단에 추가 -->
+      <email-form ref="emailForm" class="mt-4"></email-form>
     </v-container>
   </v-app>
 </template>
@@ -159,6 +166,7 @@ export default {
       lineHeightNormal: 1.2,
       lineHeightCompact: 0.3,
       file: null,
+      previewPanel: [0], // 기본으로 열려있는 상태
       snackbar: false,
       snackbarMessage: ''
     };
@@ -206,6 +214,11 @@ export default {
         }));
       };
       reader.readAsArrayBuffer(this.file);
+    },
+    handleDropExcel(event) {
+      const files = event.dataTransfer.files;
+      this.file = files[0];
+      this.handleFileUpload();
     },
     generateHtmlTemplate(lineHeight) {
       const headerLines = this.headerMessage.split('\n').map(line => `<div>${line}</div>`).join('');
@@ -342,7 +355,6 @@ export default {
                     MAKER: ${this.maker}<br>
                     TYPE: ${this.type}
                 </th>
-            </tr>
             <tr>
                 <th>NO.</th>
                 <th>CODE</th>
@@ -398,6 +410,7 @@ export default {
         }
 
         const pdfUrl = pdfResponse.data.pdfUrl; // Assuming your backend returns the URL of the uploaded PDF
+
         // Now send the form data along with the PDF URL to your backend
         const customerInquiry = {
           companyName: this.companyName,
@@ -418,6 +431,9 @@ export default {
         this.$refs.emailForm.addAttachment(pdfUrl);
         this.snackbarMessage = '생성되었습니다';
         this.snackbar = true;
+
+        // Fetch mail template and set email form data
+        this.fetchMailTemplate();
       } catch (error) {
         console.error('Error sending request:', error);
         this.snackbarMessage = '생성에 실패했습니다';
@@ -426,18 +442,22 @@ export default {
     },
     async fetchMailTemplate() {
       try {
-        const response = await axios.get(`http://127.0.0.1:8888/api/company/mail-template`, {
-          params: { companyName: this.companyName }
+        const response = await axios.get(`http://127.0.0.1:8888/api/member/mail-template`, {
+          params: {companyName: this.companyName}
         });
 
-        if (response.data && response.data.headerMessage) {
-          this.headerMessage = response.data.headerMessage;
+        if (response.data) {
+          const {mailTitle, mailHeader, mailBody} = response.data;
+          this.headerMessage = mailHeader || '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.';
+          this.$refs.emailForm.setTemplateData(mailTitle || 'Default Subject', mailBody || 'Default Message from buyer');
         } else {
           this.headerMessage = '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.';
+          this.$refs.emailForm.setTemplateData('Default Subject', 'Default Message from buyer');
         }
       } catch (error) {
         console.error('Error fetching mail template:', error);
         this.headerMessage = '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.';
+        this.$refs.emailForm.setTemplateData('Default Subject', 'Default Message from buyer');
       }
     }
   }
@@ -461,5 +481,14 @@ export default {
   padding: 16px;
   margin-top: 32px;
   background-color: #f9f9f9;
+}
+
+.drop-zone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 16px;
+  width: 100%; /* 추가 */
 }
 </style>
