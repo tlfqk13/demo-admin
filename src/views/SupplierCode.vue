@@ -84,7 +84,7 @@ export default {
         { text: '주소', value: 'address', width: '300px' },
         { text: '국가', value: 'country', width: '200px' },
       ],
-      customers: [],
+      customers: [],  // 초기 상태를 빈 배열로 설정
       selectedCustomer: {
         id: null,
         code: '',
@@ -112,12 +112,21 @@ export default {
   },
   methods: {
     fetchCustomers() {
+      console.log('Fetching customers...'); // 디버그용 로그 추가
       axios.get('http://localhost:8888/api/suppliers')
         .then(response => {
-          this.customers = response.data.suppliers;
+          console.log('Customers fetched:', response.data); // 디버그용 로그 추가
+          if (response.data.suppliers) {
+            this.customers = response.data.suppliers;
+            console.log('Updated customers state:', this.customers); // 디버깅 로그 추가
+          } else {
+            this.customers = [];
+            console.log('Customers state set to empty array'); // 디버깅 로그 추가
+          }
         })
         .catch(error => {
           console.error('There was an error fetching the customers!', error);
+          this.customers = [];
         });
     },
     selectCustomer(customer) {
@@ -128,8 +137,8 @@ export default {
         // Update existing customer
         axios.put(`http://localhost:8888/api/suppliers/${this.selectedCustomer.id}`, this.selectedCustomer)
           .then(response => {
-            console.log('Updated customer response:', response.data);
-            this.customers = response.data.suppliers;
+            console.log('Updated customer response:', response.data); // 디버그용 로그 추가
+            this.fetchCustomers(); // 데이터를 다시 가져와서 갱신
             alert('Customer updated successfully.');
           })
           .catch(error => {
@@ -139,8 +148,8 @@ export default {
         // Add new customer
         axios.post('http://localhost:8888/api/suppliers', this.selectedCustomer)
           .then(response => {
-            console.log('Added customer response:', response.data);
-            this.customers = response.data.suppliers;
+            console.log('Added customer response:', response.data); // 디버그용 로그 추가
+            this.fetchCustomers(); // 데이터를 다시 가져와서 갱신
             alert('Customer added successfully.');
           })
           .catch(error => {

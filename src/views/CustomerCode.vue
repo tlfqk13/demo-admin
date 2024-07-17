@@ -128,10 +128,8 @@ export default {
         // Update existing customer
         axios.put(`http://localhost:8888/api/customers/${this.selectedCustomer.id}`, this.selectedCustomer)
           .then(response => {
-            const index = this.customers.findIndex(c => c.id === this.selectedCustomer.id);
-            if (index > -1) {
-              this.customers.splice(index, 1, response.data.customer);
-            }
+            console.log('Updated customer response:', response.data); // 디버그용 로그 추가
+            this.fetchCustomers(); // 데이터를 다시 가져와서 갱신
             alert('Customer updated successfully.');
           })
           .catch(error => {
@@ -141,7 +139,8 @@ export default {
         // Add new customer
         axios.post('http://localhost:8888/api/customers', this.selectedCustomer)
           .then(response => {
-            this.customers.push(response.data.customer);
+            console.log('Added customer response:', response.data); // 디버그용 로그 추가
+            this.fetchCustomers(); // 데이터를 다시 가져와서 갱신
             alert('Customer added successfully.');
           })
           .catch(error => {
