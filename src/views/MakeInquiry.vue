@@ -55,6 +55,8 @@
               label="Company Name"
               @change="fetchMailTemplate"
             ></v-text-field>
+            <v-alert v-if="companyChecked && companyExists" type="success" v-show="showValidation">메일 템플릿이 존재하는 회사 입니다</v-alert>
+            <v-alert v-else-if="companyChecked && !companyExists" type="error" v-show="showValidation">메일 템플릿이 존재하지 않는 회사 입니다</v-alert>
           </v-col>
           <v-col cols="12" md="3">
             <v-text-field v-model="vesselName" label="Vessel Name"></v-text-field>
@@ -168,7 +170,10 @@ export default {
       file: null,
       previewPanel: [0], // 기본으로 열려있는 상태
       snackbar: false,
-      snackbarMessage: ''
+      snackbarMessage: '',
+      companyExists: false,
+      companyChecked: false,
+      showValidation: false
     };
   },
   methods: {
@@ -443,21 +448,34 @@ export default {
     async fetchMailTemplate() {
       try {
         const response = await axios.get(`http://127.0.0.1:8888/api/member/mail-template`, {
-          params: {companyName: this.companyName}
+          params: { companyName: this.companyName }
         });
 
         if (response.data) {
-          const {mailTitle, mailHeader, mailBody} = response.data;
+          const { mailTitle, mailHeader, mailBody, companyName } = response.data;
           this.headerMessage = mailHeader || '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.';
           this.$refs.emailForm.setTemplateData(mailTitle || 'Default Subject', mailBody || 'Default Message from buyer');
+          this.companyExists = companyName !== null;
         } else {
           this.headerMessage = '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.';
           this.$refs.emailForm.setTemplateData('Default Subject', 'Default Message from buyer');
+          this.companyExists = false;
         }
+        this.companyChecked = true;
+        this.showValidation = true;
+        setTimeout(() => {
+          this.showValidation = false;
+        }, 5000);
       } catch (error) {
         console.error('Error fetching mail template:', error);
         this.headerMessage = '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.';
         this.$refs.emailForm.setTemplateData('Default Subject', 'Default Message from buyer');
+        this.companyExists = false;
+        this.companyChecked = true;
+        this.showValidation = true;
+        setTimeout(() => {
+          this.showValidation = false;
+        }, 5000);
       }
     }
   }
@@ -489,6 +507,6 @@ export default {
   padding: 20px;
   text-align: center;
   margin-bottom: 16px;
-  width: 100%; /* 추가 */
+  width: 50%; /* 추가 */
 }
 </style>

@@ -1,54 +1,6 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12">
-        <v-card>
-          <v-card-title>
-            <v-icon
-              :color="checking ? 'red lighten-2' : 'indigo'"
-              class="mr-12"
-              size="64"
-              @click="takePulse"
-            >
-              mdi-heart-pulse
-            </v-icon>
-            <v-row align="start">
-              <div class="text-caption grey--text text-uppercase">
-                Heart rate
-              </div>
-              <div>
-                <span
-                  class="text-h3 font-weight-black"
-                  v-text="avg || '—'"
-                />
-                <strong v-if="avg">BPM</strong>
-              </div>
-            </v-row>
-
-            <v-spacer />
-
-            <v-btn
-              icon
-              class="align-self-start"
-              size="28"
-            >
-              <v-icon>mdi-arrow-right-thick</v-icon>
-            </v-btn>
-          </v-card-title>
-
-          <v-sheet color="transparent">
-            <v-sparkline
-              :key="String(avg)"
-              :smooth="16"
-              :gradient="['#f72047', '#ffd200', '#1feaea']"
-              :line-width="3"
-              :value="heartbeats"
-              auto-draw
-              stroke-linecap="round"
-            />
-          </v-sheet>
-        </v-card>
-      </v-col>
       <v-col
         v-for="(item, index) in items1"
         :key="`sheet-${index}`"
@@ -151,7 +103,6 @@ export default {
   name: 'DashboardTest',
   data: () => ({
     checking: false,
-    heartbeats: [],
     item: [
       423,
       446,
@@ -261,16 +212,6 @@ export default {
     ]
 
   }),
-  computed: {
-    avg() {
-      const sum = this.heartbeats.reduce((acc, cur) => acc + cur, 0);
-      const length = this.heartbeats.length;
-
-      if (!sum && !length) return 0;
-
-      return Math.ceil(sum / length);
-    },
-  },
   created() {
     this.takePulse(false);
     this.fetchData();  // 데이터 가져오기 메서드 호출
@@ -284,7 +225,6 @@ export default {
 
       inhale && await exhale(1000);
 
-      this.heartbeats = Array.from({ length: 20 }, this.heartbeat);
 
       this.checking = false;
     },
