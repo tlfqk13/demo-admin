@@ -4,7 +4,7 @@
       <v-col cols="8">
         <v-card class="rounded-table elevation-3">
           <v-card-title>
-            <v-icon class="mr-2" color="green" size="32">mdi-invoice-arrow-left</v-icon>
+            <v-icon class="mr-2" color="green" size="32">mdi-invoice-arrow-right-outline</v-icon>
             매입처 코드 목록
           </v-card-title>
           <v-card-text>
@@ -12,7 +12,7 @@
               :headers="headers"
               :items="filteredCustomers"
               class="elevation-1 rounded-table-content"
-              item-key="code"
+              item-key="id"
               dense
               @click:row="selectCustomer"
               :items-per-page="15"
@@ -20,7 +20,11 @@
               <template v-slot:top>
                 <v-toolbar flat>
                   <v-toolbar-title>매입처 코드 목록</v-toolbar-title>
-                  <v-divider class="mx-4" inset vertical></v-divider>
+                  <v-divider
+                    class="mx-4"
+                    inset
+                    vertical
+                  ></v-divider>
                   <v-spacer></v-spacer>
                   <v-text-field
                     v-model="search"
@@ -39,20 +43,24 @@
       <v-col cols="4">
         <v-card class="rounded-card elevation-3">
           <v-card-title>
-            <v-icon class="mr-2" color="green" size="32">mdi-information</v-icon>
             매입처 정보
           </v-card-title>
           <v-card-text>
             <v-form>
-              <v-text-field label="코드" v-model="selectedCustomer.code" readonly></v-text-field>
-              <v-text-field label="사업자명" v-model="selectedCustomer.businessName" readonly></v-text-field>
-              <v-text-field label="연락처" v-model="selectedCustomer.contact" readonly></v-text-field>
-              <v-text-field label="담당자" v-model="selectedCustomer.contactPerson" readonly></v-text-field>
-              <v-text-field label="E-MAIL" v-model="selectedCustomer.email" readonly></v-text-field>
-              <v-text-field label="주소" v-model="selectedCustomer.address" readonly></v-text-field>
-              <v-text-field label="기타정보" v-model="selectedCustomer.extraInfo" readonly></v-text-field>
+              <v-text-field label="코드" v-model="selectedCustomer.code"></v-text-field>
+              <v-text-field label="사업자명" v-model="selectedCustomer.businessName"></v-text-field>
+              <v-text-field label="연락처" v-model="selectedCustomer.contact"></v-text-field>
+              <v-text-field label="담당자" v-model="selectedCustomer.representative"></v-text-field>
+              <v-text-field label="E-MAIL" v-model="selectedCustomer.email"></v-text-field>
+              <v-text-field label="주소" v-model="selectedCustomer.address"></v-text-field>
+              <v-text-field label="국가" v-model="selectedCustomer.country"></v-text-field>
             </v-form>
           </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" @click="saveCustomer">저장</v-btn>
+            <v-btn color="secondary" @click="resetForm">초기화</v-btn>
+          </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
@@ -60,53 +68,32 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
-  name: 'SupplierCode',
+  name: 'CustomerCode',
   data() {
     return {
       search: '',
       headers: [
-        {text: '코드', value: 'code', width: '100px'},
-        {text: '사업자명', value: 'businessName', width: '200px'},
-        {text: '연락처', value: 'phone', width: '200px'},
-        {text: '담당자', value: 'contactPerson', width: '150px'},
-        {text: 'E-MAIL', value: 'email', width: '200px'},
-        {text: '주소', value: 'address', width: '300px'},
-        {text: '기타정보', value: 'extraInfo', width: '200px'},
+        { text: '코드', value: 'code', width: '100px' },
+        { text: '사업자명', value: 'businessName', width: '200px' },
+        { text: '연락처', value: 'contact', width: '200px' },
+        { text: '담당자', value: 'representative', width: '150px' },
+        { text: 'E-MAIL', value: 'email', width: '200px' },
+        { text: '주소', value: 'address', width: '300px' },
+        { text: '국가', value: 'country', width: '200px' },
       ],
-      customers: [
-        {
-          code: 'AR',
-          businessName: 'ARYA TANKERS PVT LTD',
-          contactPerson: 'Mr. Yogesh',
-          phone: '+91 22 49229009',
-          email: 'yogesh.shinde@arya.in',
-          address: 'Marathon Futurex, B-501, Mafatlal Mills, N.M. Joshi Marg, Lower Parel, Mumbai',
-          supplierCode: 'SUP123',
-          contact: '+91 22 49229009',
-          extraInfo: '추가 정보 예시'
-        },
-        // 예시 데이터 29개 추가
-        ...Array.from({length: 29}, (_, i) => ({
-          code: `CUST${i + 1}`,
-          businessName: `Business ${i + 1}`,
-          contactPerson: `Contact ${i + 1}`,
-          phone: `+91 22 4000000${i + 1}`,
-          email: `email${i + 1}@business.com`,
-          address: `Address ${i + 1}`,
-          supplierCode: `SUP${i + 1}`,
-          contact: `+91 22 4000000${i + 1}`,
-          extraInfo: `Extra info ${i + 1}`
-        }))
-      ],
+      customers: [],
       selectedCustomer: {
+        id: null,
         code: '',
         businessName: '',
-        supplierCode: '',
-        address: '',
         contact: '',
+        representative: '',
         email: '',
-        extraInfo: '',
+        address: '',
+        country: '',
       }
     };
   },
@@ -120,40 +107,101 @@ export default {
       );
     }
   },
-  methods: {
-    selectCustomer(customer) {
-      this.selectedCustomer = {...customer};
-    },
+  mounted() {
+    this.fetchCustomers();
   },
+  methods: {
+    fetchCustomers() {
+      axios.get('http://localhost:8888/api/suppliers')
+        .then(response => {
+          this.customers = response.data.suppliers;
+        })
+        .catch(error => {
+          console.error('There was an error fetching the customers!', error);
+        });
+    },
+    selectCustomer(customer) {
+      this.selectedCustomer = { ...customer };
+    },
+    saveCustomer() {
+      if (this.selectedCustomer.id) {
+        // Update existing customer
+        axios.put(`http://localhost:8888/api/suppliers/${this.selectedCustomer.id}`, this.selectedCustomer)
+          .then(response => {
+            console.log('Updated customer response:', response.data);
+            this.customers = response.data.suppliers;
+            alert('Customer updated successfully.');
+          })
+          .catch(error => {
+            console.error('There was an error updating the customer!', error);
+          });
+      } else {
+        // Add new customer
+        axios.post('http://localhost:8888/api/suppliers', this.selectedCustomer)
+          .then(response => {
+            console.log('Added customer response:', response.data);
+            this.customers = response.data.suppliers;
+            alert('Customer added successfully.');
+          })
+          .catch(error => {
+            console.error('There was an error adding the customer!', error);
+          });
+      }
+      this.resetForm();
+    },
+    resetForm() {
+      this.selectedCustomer = {
+        id: null,
+        code: '',
+        businessName: '',
+        contact: '',
+        representative: '',
+        email: '',
+        address: '',
+        country: '',
+      };
+    }
+  }
 };
 </script>
 
 <style scoped>
+.rounded-table-content {
+  border-radius: 16px !important;
+}
+
 .v-card-title {
   background-color: #f5f5f5;
   font-weight: bold;
-  display: flex;
-  align-items: center;
+  font-size: 1.2em;
 }
 
 .v-card-text {
   padding-bottom: 20px;
 }
 
-.rounded-table {
-  border-radius: 16px;
-  overflow: hidden;
+.overflow-x-auto {
+  overflow-x: auto;
 }
 
-.rounded-table-content {
-  border-radius: 16px !important;
+.v-data-table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
 }
 
-.elevation-3 {
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+.v-data-table td {
+  white-space: nowrap;
 }
 
-.rounded-card {
-  border-radius: 16px;
+.v-data-table tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.v-toolbar-title {
+  font-weight: bold;
+}
+
+.v-btn {
+  margin-top: 16px;
 }
 </style>
