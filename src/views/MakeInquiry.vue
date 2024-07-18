@@ -53,13 +53,15 @@
             <v-text-field
               v-model="companyName"
               label="Company Name"
-              @change="fetchMailTemplate"
             ></v-text-field>
-            <v-alert v-if="companyChecked && companyExists" type="success" v-show="showValidation">메일 템플릿이 존재하는 회사 입니다</v-alert>
-            <v-alert v-else-if="companyChecked && !companyExists" type="error" v-show="showValidation">메일 템플릿이 존재하지 않는 회사 입니다</v-alert>
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field v-model="vesselName" label="Vessel Name"></v-text-field>
+            <v-text-field
+              v-model="vesselName"
+              label="Vessel Name"
+              append-icon="mdi-magnify"
+              @click:append="openVesselDialog"
+            ></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
             <v-text-field v-model="refNumber" label="Reference Number" :readonly="false"></v-text-field>
@@ -72,6 +74,15 @@
           </v-col>
           <v-col cols="12" md="3">
             <v-text-field v-model="type" label="TYPE"></v-text-field>
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-text-field
+              v-model="selectedSuppliersLabel"
+              label="Select Suppliers"
+              append-icon="mdi-magnify"
+              readonly
+              @click:append="openSupplierDialog"
+            ></v-text-field>
           </v-col>
         </v-row>
 
@@ -133,6 +144,56 @@
 
       <!-- EmailForm 컴포넌트를 하단에 추가 -->
       <email-form ref="emailForm" class="mt-4"></email-form>
+
+      <!-- Supplier selection dialog -->
+      <v-dialog v-model="supplierDialog" max-width="600px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Select Suppliers</span>
+          </v-card-title>
+          <v-card-text>
+            <v-checkbox v-model="allSuppliersSelected" @change="selectAllSuppliers" label="Select All"></v-checkbox>
+            <v-divider></v-divider>
+            <div v-for="supplier in suppliers" :key="supplier.id">
+              <v-checkbox
+                :label="supplier.businessName"
+                :value="supplier.id"
+                v-model="selectedSuppliers"
+              ></v-checkbox>
+            </div>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="blue darken-1" text @click="closeSupplierDialog">Cancel</v-btn>
+            <v-btn color="blue darken-1" text @click="saveSelectedSuppliers">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <!-- Vessel selection dialog -->
+      <v-dialog v-model="vesselDialog" max-width="600px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Select Vessel</span>
+          </v-card-title>
+          <v-card-text>
+            <v-text-field
+              v-model="vesselSearch"
+              label="Search"
+              append-icon="mdi-magnify"
+              @click:append="fetchVessels"
+            ></v-text-field>
+            <v-divider></v-divider>
+            <v-list>
+              <v-list-item v-for="vessel in filteredVessels" :key="vessel.id" @click="selectVessel(vessel)">
+                <v-list-item-title>{{ vessel.name }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="blue darken-1" text @click="closeVesselDialog">Cancel</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-container>
   </v-app>
 </template>
@@ -155,6 +216,8 @@ export default {
     return {
       companyName: '',
       vesselName: '',
+      vesselSearch: '',
+      vessels: [],
       refNumber: this.generateReferenceNumber(),
       date: this.getCurrentDate(),
       maker: '',
@@ -171,10 +234,17 @@ export default {
       previewPanel: [0], // 기본으로 열려있는 상태
       snackbar: false,
       snackbarMessage: '',
-      companyExists: false,
-      companyChecked: false,
-      showValidation: false
+      supplierDialog: false,
+      vesselDialog: false,
+      allSuppliersSelected: false,
+      suppliers: [],
+      selectedSuppliers: [],
+      selectedSuppliersLabel: ''
     };
+  },
+  created() {
+    this.fetchSuppliers();
+    this.fetchVessels();
   },
   methods: {
     getCurrentDate() {
@@ -393,11 +463,15 @@ export default {
 
       const template = Handlebars.compile(templateString);
       return template({
+        logoPath,
         companyName: this.companyName,
         vesselName: this.vesselName,
         refNumber: this.refNumber,
         date: this.date,
         headerMessage: headerLines,
+        maker: this.maker,
+        type: this.type,
+        lineHeight,
         items: this.items
       });
     },
@@ -438,45 +512,83 @@ export default {
         this.snackbar = true;
 
         // Fetch mail template and set email form data
-        this.fetchMailTemplate();
       } catch (error) {
         console.error('Error sending request:', error);
         this.snackbarMessage = '생성에 실패했습니다';
         this.snackbar = true;
       }
     },
-    async fetchMailTemplate() {
-      try {
-        const response = await axios.get(`http://127.0.0.1:8888/api/member/mail-template`, {
-          params: { companyName: this.companyName }
-        });
-
-        if (response.data) {
-          const { mailTitle, mailHeader, mailBody, companyName } = response.data;
-          this.headerMessage = mailHeader || '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.';
-          this.$refs.emailForm.setTemplateData(mailTitle || 'Default Subject', mailBody || 'Default Message from buyer');
-          this.companyExists = companyName !== null;
-        } else {
-          this.headerMessage = '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.';
-          this.$refs.emailForm.setTemplateData('Default Subject', 'Default Message from buyer');
-          this.companyExists = false;
-        }
-        this.companyChecked = true;
-        this.showValidation = true;
-        setTimeout(() => {
-          this.showValidation = false;
-        }, 5000);
-      } catch (error) {
-        console.error('Error fetching mail template:', error);
-        this.headerMessage = '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.';
-        this.$refs.emailForm.setTemplateData('Default Subject', 'Default Message from buyer');
-        this.companyExists = false;
-        this.companyChecked = true;
-        this.showValidation = true;
-        setTimeout(() => {
-          this.showValidation = false;
-        }, 5000);
+    openSupplierDialog() {
+      this.supplierDialog = true;
+    },
+    closeSupplierDialog() {
+      this.supplierDialog = false;
+    },
+    selectAllSuppliers() {
+      if (this.allSuppliersSelected) {
+        this.selectedSuppliers = this.suppliers.map(supplier => supplier.id);
+      } else {
+        this.selectedSuppliers = [];
       }
+    },
+    async fetchSuppliers() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8888/api/suppliers');
+        if (response.data && Array.isArray(response.data.suppliers)) {
+          this.suppliers = response.data.suppliers.filter(supplier => supplier && supplier.id !== null); // null 값 필터링
+        } else {
+          console.error('Invalid response format:', response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching suppliers:', error);
+      }
+    },
+    saveSelectedSuppliers() {
+      console.log('Selected suppliers:', this.selectedSuppliers);
+      this.selectedSuppliersLabel = this.suppliers
+        .filter(supplier => this.selectedSuppliers.includes(supplier.id))
+        .map(supplier => supplier.businessName)
+        .join(', ');
+
+      const selectedEmails = this.suppliers
+        .filter(supplier => this.selectedSuppliers.includes(supplier.id))
+        .map(supplier => supplier.email)
+        .join(', ');
+
+      this.$refs.emailForm.setToEmail(selectedEmails);
+      this.closeSupplierDialog();
+    },
+    openVesselDialog() {
+      this.vesselDialog = true;
+    },
+    closeVesselDialog() {
+      this.vesselDialog = false;
+    },
+    async fetchVessels() {
+      try {
+        const response = await axios.get('http://127.0.0.1:8888/api/vessels');
+        if (response.data && Array.isArray(response.data.vessels)) {
+          this.vessels = response.data.vessels.filter(vessel => vessel && vessel.id !== null); // null 값 필터링
+        } else {
+          console.error('Invalid response format:', response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching vessels:', error);
+      }
+    },
+    selectVessel(vessel) {
+      this.vesselName = vessel.name;
+      this.closeVesselDialog();
+    }
+  },
+  computed: {
+    filteredVessels() {
+      if (!this.vesselSearch) {
+        return this.vessels;
+      }
+      return this.vessels.filter(vessel =>
+        vessel.name.toLowerCase().includes(this.vesselSearch.toLowerCase())
+      );
     }
   }
 }

@@ -50,9 +50,9 @@
         </v-card-title>
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="3">
+            <v-col cols="12" md="6">
               <v-card class="mx-auto mail-card">
-                <div class="card-header" style="background-color: #cdd400;">
+                <div class="card-header company-card">
                   <v-list-item three-line>
                     <v-list-item-content>
                       <v-list-item-title class="headline">Company Name</v-list-item-title>
@@ -64,9 +64,9 @@
                 </v-card-text>
               </v-card>
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col cols="12" md="6">
               <v-card class="mx-auto mail-card">
-                <div class="card-header" style="background-color: #00BCD4;">
+                <div class="card-header mail-title-card">
                   <v-list-item three-line>
                     <v-list-item-content>
                       <v-list-item-title class="headline">Mail Title</v-list-item-title>
@@ -78,9 +78,9 @@
                 </v-card-text>
               </v-card>
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col cols="12">
               <v-card class="mx-auto mail-card">
-                <div class="card-header" style="background-color: #FF9800;">
+                <div class="card-header mail-header-card">
                   <v-list-item three-line>
                     <v-list-item-content>
                       <v-list-item-title class="headline">Mail Header</v-list-item-title>
@@ -88,13 +88,13 @@
                   </v-list-item>
                 </div>
                 <v-card-text>
-                  <v-textarea v-model="currentTemplate.mailHeader" label="Mail Header" rows="3"></v-textarea>
+                  <v-textarea v-model="currentTemplate.mailHeader" label="Mail Header" rows="4"></v-textarea>
                 </v-card-text>
               </v-card>
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col cols="12">
               <v-card class="mx-auto mail-card">
-                <div class="card-header" style="background-color: #8BC34A;">
+                <div class="card-header mail-body-card">
                   <v-list-item three-line>
                     <v-list-item-content>
                       <v-list-item-title class="headline">Mail Body</v-list-item-title>
@@ -102,7 +102,7 @@
                   </v-list-item>
                 </div>
                 <v-card-text>
-                  <v-textarea v-model="currentTemplate.mailBody" label="Mail Body" rows="3"></v-textarea>
+                  <v-textarea v-model="currentTemplate.mailBody" label="Mail Body" rows="8"></v-textarea>
                 </v-card-text>
               </v-card>
             </v-col>
@@ -130,7 +130,7 @@ export default {
       dialogTitle: '',
       valid: true,
       headers: [
-        { text: 'Company Name', value: 'companyName' }, // 회사 이름 추가
+        { text: 'Company Name', value: 'companyName' },
         { text: 'Mail Title', value: 'mailTitle' },
         { text: 'Mail Header', value: 'mailHeader' },
         { text: 'Mail Body', value: 'mailBody' },
@@ -138,8 +138,8 @@ export default {
       ],
       mailTemplates: [],
       currentTemplate: {
-        id: null, // ID 추가
-        companyName: '', // companyName 추가
+        id: null,
+        companyName: '',
         mailTitle: '',
         mailHeader: '',
         mailBody: '',
@@ -165,7 +165,6 @@ export default {
     fetchMailTemplates() {
       axios.get(`http://localhost:8888/api/member/mail-templates`)
         .then(response => {
-          // 응답 데이터가 배열이 아니면 배열로 변환
           if (response.data && !Array.isArray(response.data)) {
             this.mailTemplates = [response.data];
           } else {
@@ -208,7 +207,6 @@ export default {
       };
 
       if (this.currentTemplate.id) {
-        // 기존 템플릿 업데이트
         axios.put(`http://localhost:8888/api/member/mail-template/${this.currentTemplate.id}`, requestPayload)
           .then(() => {
             this.fetchMailTemplates();
@@ -218,7 +216,6 @@ export default {
             console.error('There was an error updating the template!', error);
           });
       } else {
-        // 새 템플릿 생성
         axios.post('http://localhost:8888/api/member/mail-template', requestPayload)
           .then(() => {
             this.fetchMailTemplates();
@@ -242,15 +239,36 @@ export default {
   color: white;
 }
 .v-card .mx-auto {
-  margin: 20px auto;
+  margin: 10px auto;
 }
 .v-card.mail-card {
   padding: 0;
-  height: 250px;
   background-color: white;
 }
 .card-header {
-  padding: 20px;
+  padding: 6px;
+}
+.company-card {
+  height: 70px;
+  background-color: #cdd400;
+}
+.mail-title-card {
+  height: 70px;
+  background-color: #00BCD4;
+}
+.mail-header-card {
+  height: 70px;
+  background-color: #FF9800;
+}
+.mail-body-card {
+  height: 70px;
+  background-color: #8BC34A;
+}
+.mail-header-card .v-card-text {
+  height: 200px;
+}
+.mail-body-card .v-card-text {
+  height: 200px;
 }
 .v-card-text {
   padding: 20px;

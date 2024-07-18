@@ -9,12 +9,9 @@
         <v-text-field v-model="toEmail" label="To Email"></v-text-field>
         <v-text-field v-model="subject" label="Subject"></v-text-field>
         <v-textarea v-model="message" label="Message from buyer:" rows="3"></v-textarea>
-
-        <!-- 드롭 영역 -->
         <div class="drop-zone" @drop.prevent="handleFileDrop" @dragover.prevent>
           Drop PDF files here or click to select
         </div>
-
         <v-file-input
           v-model="newAttachments"
           label="Attach PDFs"
@@ -24,7 +21,6 @@
           chips
           @change="handleFileInputChange"
         ></v-file-input>
-
         <v-list>
           <v-list-item v-for="(attachment, index) in attachments" :key="index">
             <v-list-item-content>{{ attachment.name || attachment }}</v-list-item-content>
@@ -35,7 +31,6 @@
     <v-card-actions>
       <v-btn color="primary" @click="sendEmail">Send Email</v-btn>
     </v-card-actions>
-
     <v-snackbar v-model="snackbar" :timeout="3000" top>
       {{ snackbarMessage }}
       <v-btn color="red" text @click="snackbar = false">Close</v-btn>
@@ -86,9 +81,8 @@ export default {
     addAttachment(pdfUrl) {
       this.attachments.push(pdfUrl);
     },
-    setTemplateData(subject, message) {
-      this.subject = subject;
-      this.message = message;
+    setToEmail(email) {
+      this.toEmail = email;
     },
     async sendEmail() {
       const formData = new FormData();
@@ -96,12 +90,11 @@ export default {
       formData.append('subject', this.subject);
       formData.append('message', this.message);
 
-      // Append attachment URLs
       this.attachments.forEach((file) => {
         if (typeof file === 'string') {
-          formData.append('attachmentUrls', file); // Add URLs as strings
+          formData.append('attachmentUrls', file);
         } else {
-          formData.append('attachments', file); // Add files as MultipartFile
+          formData.append('attachments', file);
         }
       });
 
