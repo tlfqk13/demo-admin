@@ -93,7 +93,6 @@
             <thead>
             <tr>
               <th>NO.</th>
-              <th>ITEM ID</th>
               <th>CODE</th>
               <th>DESCRIPTION</th>
               <th>Q'TY</th>
@@ -107,9 +106,8 @@
             <tbody>
             <tr v-for="(item, index) in items" :key="index">
               <td>{{ index + 1 }}</td>
-              <td><v-text-field v-model="item.itemId" dense></v-text-field></td>
-              <td><v-text-field v-model="item.itemCode" dense></v-text-field></td>
-              <td><v-text-field v-model="item.itemDescription" dense></v-text-field></td>
+              <td><v-text-field v-model="item.code" dense></v-text-field></td>
+              <td><v-text-field v-model="item.description" dense></v-text-field></td>
               <td><v-text-field v-model="item.qty" type="number" dense></v-text-field></td>
               <td><v-text-field v-model="item.unit" dense></v-text-field></td>
               <td><v-text-field v-model="item.uprice" type="number" dense></v-text-field></td>
@@ -226,9 +224,9 @@ export default {
       type: '',
       headerMessage: '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.',
       items: [
-        {itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
-        {itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
-        {itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''}
+        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
+        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
+        {code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''}
       ],
       lineHeightNormal: 1.2,
       lineHeightCompact: 0.3,
@@ -265,7 +263,7 @@ export default {
       return `${yyyy}${mm}${dd}-${uniqueNumber}`;
     },
     addItem() {
-      this.items.push({itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''});
+      this.items.push({code: '', description: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''});
     },
     removeItem(index) {
       this.items.splice(index, 1);
@@ -281,9 +279,8 @@ export default {
 
         // Setting items from Excel data (skipping the header row)
         this.items = json.slice(1).map(row => ({
-          itemId: null,
-          itemCode: row[0] || '',
-          itemDescription: row[1] || '',
+          code: row[0] || '',
+          description: row[1] || '',
           qty: row[2] || 0,
           unit: row[3] || '',
           uprice: row[4] || 0,
@@ -435,7 +432,6 @@ export default {
                 </th>
             <tr>
                 <th>NO.</th>
-                <th>ITEM ID</th>
                 <th>CODE</th>
                 <th>DESCRIPTION</th>
                 <th>Q'TY</th>
@@ -449,9 +445,8 @@ export default {
             {{#each items}}
             <tr>
                 <td>{{@index}}</td>
-                <td>{{this.itemId}}</td>
-                <td>{{this.itemCode}}</td>
-                <td>{{this.itemDescription}}</td>
+                <td>{{this.code}}</td>
+                <td>{{this.description}}</td>
                 <td>{{this.qty}}</td>
                 <td>{{this.unit}}</td>
                 <td>{{this.uprice}}</td>
@@ -503,18 +498,8 @@ export default {
           date: this.date,
           maker: this.maker,
           type: this.type,
-          inquiryType: 'CUSTOMER_INQUIRY',
-          memberId: 1, // 예시로 회원 ID 설정
-          inquiryItemDetails: this.items.map(item => ({
-            itemId: item.itemId,
-            itemCode: item.itemCode,
-            itemDescription: item.itemDescription,
-            qty: item.qty,
-            unit: item.unit,
-            uprice: item.uprice,
-            amount: item.amount,
-            notes: item.notes
-          })),
+          headerMessage: this.headerMessage,
+          items: this.items,
           pdfUrl: pdfUrl
         };
 
