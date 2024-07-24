@@ -19,18 +19,18 @@
                 </v-card-text>
                 <v-card-actions>
                   <div
-                    class="drop-zone"
-                    @dragover.prevent
-                    @dragenter.prevent
-                    @drop.prevent="handleDropExcel"
+                      class="drop-zone"
+                      @dragover.prevent
+                      @dragenter.prevent
+                      @drop.prevent="handleDropExcel"
                   >
                     Drop Excel files here or click to select
                   </div>
                   <v-file-input
-                    v-model="file"
-                    label="Upload Excel File"
-                    @change="handleFileUpload"
-                    accept=".xlsx, .xls"
+                      v-model="file"
+                      label="Upload Excel File"
+                      @change="handleFileUpload"
+                      accept=".xlsx, .xls"
                   ></v-file-input>
                 </v-card-actions>
               </v-card>
@@ -51,16 +51,16 @@
         <v-row>
           <v-col cols="12" md="3">
             <v-text-field
-              v-model="companyName"
-              label="Company Name"
+                v-model="companyName"
+                label="Company Name"
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
             <v-text-field
-              v-model="vesselName"
-              label="Vessel Name"
-              append-icon="mdi-magnify"
-              @click:append="openVesselDialog"
+                v-model="vesselName"
+                label="Vessel Name"
+                append-icon="mdi-magnify"
+                @click:append="openVesselDialog"
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
@@ -77,53 +77,18 @@
           </v-col>
           <v-col cols="12" md="3">
             <v-text-field
-              v-model="selectedSuppliersLabel"
-              label="Select Suppliers"
-              append-icon="mdi-magnify"
-              readonly
-              @click:append="openSupplierDialog"
+                v-model="selectedSuppliersLabel"
+                label="Select Suppliers"
+                append-icon="mdi-magnify"
+                readonly
+                @click:append="openSupplierDialog"
             ></v-text-field>
           </v-col>
         </v-row>
 
         <v-btn type="button" @click="addItem" color="primary" class="mb-4">Add Item</v-btn>
 
-        <v-simple-table>
-          <template v-slot:default>
-            <thead>
-            <tr>
-              <th>NO.</th>
-              <th>ITEM ID</th>
-              <th>CODE</th>
-              <th>DESCRIPTION</th>
-              <th>Q'TY</th>
-              <th>UNIT</th>
-              <th>U/PRICE</th>
-              <th>AMOUNT</th>
-              <th>NOTES</th>
-              <th>ACTIONS</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="(item, index) in items" :key="index">
-              <td>{{ index + 1 }}</td>
-              <td><v-text-field v-model="item.itemId" dense></v-text-field></td>
-              <td><v-text-field v-model="item.itemCode" dense></v-text-field></td>
-              <td><v-text-field v-model="item.itemDescription" dense></v-text-field></td>
-              <td><v-text-field v-model="item.qty" type="number" dense></v-text-field></td>
-              <td><v-text-field v-model="item.unit" dense></v-text-field></td>
-              <td><v-text-field v-model="item.uprice" type="number" dense></v-text-field></td>
-              <td><v-text-field v-model="item.amount" type="number" dense></v-text-field></td>
-              <td><v-textarea v-model="item.notes" rows="1" dense></v-textarea></td>
-              <td>
-                <v-btn icon @click="removeItem(index)">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </td>
-            </tr>
-            </tbody>
-          </template>
-        </v-simple-table>
+        <item-list :items="items" @remove-item="removeItem"></item-list>
 
         <v-btn type="submit" color="primary" class="mt-4 mb-4">Generate</v-btn>
       </v-form>
@@ -158,9 +123,9 @@
             <v-divider></v-divider>
             <div v-for="supplier in suppliers" :key="supplier.id">
               <v-checkbox
-                :label="supplier.businessName"
-                :value="supplier.id"
-                v-model="selectedSuppliers"
+                  :label="supplier.businessName"
+                  :value="supplier.id"
+                  v-model="selectedSuppliers"
               ></v-checkbox>
             </div>
           </v-card-text>
@@ -179,10 +144,10 @@
           </v-card-title>
           <v-card-text>
             <v-text-field
-              v-model="vesselSearch"
-              label="Search"
-              append-icon="mdi-magnify"
-              @click:append="fetchVessels"
+                v-model="vesselSearch"
+                label="Search"
+                append-icon="mdi-magnify"
+                @click:append="fetchVessels"
             ></v-text-field>
             <v-divider></v-divider>
             <v-list>
@@ -205,6 +170,7 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 import Handlebars from 'handlebars';
 import EmailForm from '@/views/EmailForm.vue'; // EmailForm 컴포넌트를 import
+import ItemList from '@/views/ItemList.vue'; // ItemList 컴포넌트를 import
 
 // 이미지 경로를 require를 사용하여 불러오기
 const logoPath = require('@/assets/baskorea_logo.png');
@@ -212,7 +178,8 @@ const logoPath = require('@/assets/baskorea_logo.png');
 export default {
   name: "MakeInquiry",
   components: {
-    EmailForm // 컴포넌트를 등록
+    EmailForm, // 컴포넌트를 등록
+    ItemList // ItemList 컴포넌트 등록
   },
   data() {
     return {
@@ -226,9 +193,9 @@ export default {
       type: '',
       headerMessage: '귀사의 무궁한 발전을 기원합니다.\n하기와 같이 견적서 외뢰하오니 빠른 회신 부탁드립니다.',
       items: [
-        {itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
-        {itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''},
-        {itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''}
+        {itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '', opt: ''},
+        {itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '', opt: ''},
+        {itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '', opt: ''}
       ],
       lineHeightNormal: 1.2,
       lineHeightCompact: 0.3,
@@ -265,7 +232,7 @@ export default {
       return `${yyyy}${mm}${dd}-${uniqueNumber}`;
     },
     addItem() {
-      this.items.push({itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: ''});
+      this.items.push({itemId: null, itemCode: '', itemDescription: '', qty: 0, unit: '', uprice: 0, amount: 0, notes: '', opt: ''});
     },
     removeItem(index) {
       this.items.splice(index, 1);
@@ -288,7 +255,8 @@ export default {
           unit: row[3] || '',
           uprice: row[4] || 0,
           amount: row[5] || 0,
-          notes: row[6] || ''
+          notes: row[6] || '',
+          opt: ''
         }));
       };
       reader.readAsArrayBuffer(this.file);
@@ -561,14 +529,14 @@ export default {
     saveSelectedSuppliers() {
       console.log('Selected suppliers:', this.selectedSuppliers);
       this.selectedSuppliersLabel = this.suppliers
-        .filter(supplier => this.selectedSuppliers.includes(supplier.id))
-        .map(supplier => supplier.businessName)
-        .join(', ');
+          .filter(supplier => this.selectedSuppliers.includes(supplier.id))
+          .map(supplier => supplier.businessName)
+          .join(', ');
 
       const selectedEmails = this.suppliers
-        .filter(supplier => this.selectedSuppliers.includes(supplier.id))
-        .map(supplier => supplier.email)
-        .join(', ');
+          .filter(supplier => this.selectedSuppliers.includes(supplier.id))
+          .map(supplier => supplier.email)
+          .join(', ');
 
       this.$refs.emailForm.setToEmail(selectedEmails);
       this.closeSupplierDialog();
@@ -602,7 +570,7 @@ export default {
         return this.vessels;
       }
       return this.vessels.filter(vessel =>
-        vessel.name.toLowerCase().includes(this.vesselSearch.toLowerCase())
+          vessel.name.toLowerCase().includes(this.vesselSearch.toLowerCase())
       );
     }
   }

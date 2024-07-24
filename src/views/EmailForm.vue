@@ -1,143 +1,119 @@
 <template>
-  <v-card class="pa-3">
-    <v-card-title class="section-title">
-      <v-icon class="mr-2">mdi-email-outline</v-icon>
-      Send Email with PDF Attachments
-    </v-card-title>
-    <v-card-text>
-      <v-form>
-        <v-text-field v-model="toEmail" label="To Email"></v-text-field>
-        <v-text-field v-model="subject" label="Subject"></v-text-field>
-        <v-textarea v-model="message" label="Message from buyer:" rows="3"></v-textarea>
-        <div class="drop-zone" @drop.prevent="handleFileDrop" @dragover.prevent>
-          Drop PDF files here or click to select
-        </div>
-        <v-file-input
-          v-model="newAttachments"
-          label="Attach PDFs"
-          prepend-icon="mdi-paperclip"
-          multiple
-          show-size
-          chips
-          @change="handleFileInputChange"
-        ></v-file-input>
-        <v-list>
-          <v-list-item v-for="(attachment, index) in attachments" :key="index">
-            <v-list-item-content>{{ attachment.name || attachment }}</v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-form>
-    </v-card-text>
-    <v-card-actions>
-      <v-btn color="primary" @click="sendEmail">Send Email</v-btn>
-    </v-card-actions>
-    <v-snackbar v-model="snackbar" :timeout="3000" top>
-      {{ snackbarMessage }}
-      <v-btn color="red" text @click="snackbar = false">Close</v-btn>
-    </v-snackbar>
-  </v-card>
+  <div id="app">
+    <table>
+      <thead>
+      <tr>
+        <th>Item</th>
+        <th>Opt</th>
+        <th>품목코드</th>
+        <th>품 명</th>
+        <th>수량</th>
+        <th>단위</th>
+        <th>비고</th>
+        <th>의뢰처1</th>
+        <th>의뢰처2</th>
+        <th>
+          의뢰처3
+          <button @click="addClientColumn" v-if="maxClients < 5">+</button>
+        </th>
+        <th v-if="maxClients >= 4">의뢰처4</th>
+        <th v-if="maxClients >= 5">의뢰처5</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr v-for="(item, index) in items" :key="index">
+        <td>{{ index + 1 }}</td>
+        <td
+            @keydown="handleKeyDown($event, item)"
+            tabindex="0"
+            @focus="onFocus($event, item)"
+            @blur="onBlur($event, item)"
+            :class="{ focused: focusedItem === item }">
+          {{ item.opt || 'Select' }}
+        </td>
+        <td><input v-model="item.itemCode" type="text" /></td>
+        <td><input v-model="item.name" type="text" /></td>
+        <td><input v-model="item.quantity" type="number" /></td>
+        <td><input v-model="item.unit" type="text" /></td>
+        <td><input v-model="item.notes" type="text" /></td>
+        <td><input v-model="item.clients[0]" type="text" /></td>
+        <td><input v-model="item.clients[1]" type="text" /></td>
+        <td><input v-model="item.clients[2]" type="text" /></td>
+        <td v-if="maxClients >= 4"><input v-model="item.clients[3]" type="text" /></td>
+        <td v-if="maxClients >= 5"><input v-model="item.clients[4]" type="text" /></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
-  name: 'EmailForm',
-  props: {
-    initialAttachments: {
-      type: Array,
-      default: () => []
-    }
-  },
   data() {
     return {
-      toEmail: '',
-      subject: '',
-      message: '',
-      newAttachments: [],
-      attachments: [],
-      snackbar: false,
-      snackbarMessage: '',
+      maxClients: 3,
+      focusedItem: null,
+      items: [
+        { itemCode: "-", name: "AUX. ENGINE (MAKER:YANMAR DIESEL ENGINE PTE", quantity: 0, unit: "", notes: "", opt: "", clients: ["", "", ""] },
+        { itemCode: "651.000/00110", name: "HEXAGON THIN NUT M24", quantity: 2, unit: "PCS", notes: "", opt: "", clients: ["", "", ""] },
+        { itemCode: "651.415/00010", name: "GEAR ASSY", quantity: 1, unit: "PCS", notes: "", opt: "", clients: ["", "", ""] },
+        { itemCode: "651.415/00013", name: "GEAR ASSY", quantity: 1, unit: "PCS", notes: "Component:651.415.00 - AE1 LO PUMP (ATTACHED", opt: "", clients: ["", "", ""] }
+      ]
     };
   },
-  created() {
-    this.attachments = [...this.initialAttachments];
-  },
   methods: {
-    handleFileInputChange() {
-      this.attachments.push(...this.newAttachments);
-      this.newAttachments = [];
-    },
-    handleFileDrop(event) {
-      event.preventDefault();
-      const files = event.dataTransfer.files;
-      this.addAttachments(Array.from(files));
-    },
-    addAttachments(files) {
-      files.forEach(file => {
-        this.attachments.push(file);
-      });
-    },
-    addAttachment(pdfUrl) {
-      this.attachments.push(pdfUrl);
-    },
-    setToEmail(email) {
-      this.toEmail = email;
-    },
-    async sendEmail() {
-      const formData = new FormData();
-      formData.append('toEmail', this.toEmail);
-      formData.append('subject', this.subject);
-      formData.append('message', this.message);
-
-      this.attachments.forEach((file) => {
-        if (typeof file === 'string') {
-          formData.append('attachmentUrls', file);
-        } else {
-          formData.append('attachments', file);
-        }
-      });
-
-      try {
-        const response = await axios.post('http://127.0.0.1:8888/api/send-email', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+    addClientColumn() {
+      if (this.maxClients < 5) {
+        this.maxClients++;
+        this.items.forEach(item => {
+          item.clients.push("");
         });
-
-        if (response.status === 200) {
-          this.snackbarMessage = '이메일이 성공적으로 발송되었습니다.';
-          this.snackbar = true;
-        } else {
-          throw new Error('Email send failed');
-        }
-      } catch (error) {
-        console.error('Error sending email:', error);
-        this.snackbarMessage = '이메일 발송에 실패했습니다.';
-        this.snackbar = true;
       }
     },
-  },
-};
+    handleKeyDown(event, item) {
+      if (event.key === '1') {
+        item.opt = 'M';
+      } else if (event.key === '2') {
+        item.opt = 'T';
+      } else if (event.key === '3') {
+        item.opt = 'ID';
+      }
+    },
+    onFocus(event, item) {
+      this.focusedItem = item;
+    },
+  }
+}
 </script>
 
 <style scoped>
-.section-title {
-  background-color: #00f18d;
-  padding: 16px;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 18px;
-  text-align: center;
-  margin-bottom: 16px;
-  color: #333;
+table {
+  width: 100%;
+  border-collapse: collapse;
 }
-
-.drop-zone {
-  border: 2px dashed #ccc;
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  margin-bottom: 16px;
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+th {
+  background-color: #f4f4f4;
+}
+button {
+  padding: 4px 8px;
+  cursor: pointer;
+  margin-left: 4px;
+}
+input {
+  width: 100%;
+  padding: 4px;
+  box-sizing: border-box;
+}
+td:focus {
+  outline: none;
+}
+.focused {
+  background-color: #e6f7ff;
+  border: 2px solid #1890ff;
 }
 </style>
